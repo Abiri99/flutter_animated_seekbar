@@ -13,14 +13,22 @@ class AnimatedSeekbar extends StatefulWidget {
   _AnimatedSeekbarState createState() => _AnimatedSeekbarState();
 }
 
-class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
-
+class _AnimatedSeekbarState extends State<AnimatedSeekbar> with SingleTickerProviderStateMixin {
   double progress;
 
   double verticalDragOffset;
 
+  AnimationController _controller;
+
+  Animation _seekbarAnimation;
+
   @override
   void initState() {
+    _controller = AnimationController(duration: Duration(seconds: 5), vsync: this);
+    _seekbarAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticInOut,
+    );
     progress = widget.size.width / 2;
 //    verticalDragOffset = Offset.zero;
     verticalDragOffset = 0;
@@ -50,25 +58,26 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
 //          verticalDragOffset = dragDownDetails.localPosition;
 //        });
 //      },
-      return Container(
-        color: Colors.blue,
-        child: GestureDetector(
-          onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-            print("dx: ${dragUpdateDetails.localPosition.dx}");
-            print("dy: ${dragUpdateDetails.localPosition.dy}");
-            if (dragUpdateDetails.localPosition.dx > 0 && dragUpdateDetails.localPosition.dx < widget.size.width)
-              setState(() {
-                progress = dragUpdateDetails.localPosition.dx;
-                verticalDragOffset = dragUpdateDetails.localPosition.dy;
-              });
-          },
-          onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
+    return Container(
+      color: Colors.blue,
+      child: GestureDetector(
+        onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
+          print("dx: ${dragUpdateDetails.localPosition.dx}");
+          print("dy: ${dragUpdateDetails.localPosition.dy}");
+          if (dragUpdateDetails.localPosition.dx > 0 &&
+              dragUpdateDetails.localPosition.dx < widget.size.width)
+            setState(() {
+              progress = dragUpdateDetails.localPosition.dx;
+              verticalDragOffset = dragUpdateDetails.localPosition.dy;
+            });
+        },
+        onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
 //            while(verticalDragOffset != 0) {
-              setState(() {
-                verticalDragOffset = 0;
-              });
+          setState(() {
+            verticalDragOffset = 0;
+          });
 //            }
-          },
+        },
 //          onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
 //            print("vertical update");
 //            if (dragUpdateDetails.localPosition.dy < widget.size.height && dragUpdateDetails.localPosition.dy > 0)
@@ -77,20 +86,22 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
 // //                progress = dragUpdateDetails.localPosition.dx;
 //              });
 //          },
-//          child: AnimatedBuilder(
-//            animation: ,
-            child: CustomPaint(
+        child: AnimatedBuilder(
+          animation: _seekbarAnimation,
+          builder: (context, child) {
+            return CustomPaint(
               size: widget.size,
               painter: SeekBarPainter(
-                verticalDragOffset: verticalDragOffset ?? 0,
+                verticalDragOffset: verticalDragOffset * _seekbarAnimation.value ?? 0,
                 progress: progress,
                 width: widget.size.width,
                 height: widget.size.height,
               ),
-            ),
-//          ),
+            );
+          },
         ),
-      );
+      ),
+    );
 //    );
   }
 }
