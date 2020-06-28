@@ -58,6 +58,7 @@ class SeekBarPainter extends CustomPainter {
 //    canvas.drawLine(Offset(progress + 12, height / 2 + verticalDragOffset),
 //        Offset(width, height / 2), linePainter);
     canvas.drawCircle(Offset(progress, height / 2 + verticalDragOffset), 12, circlePainter);
+//    print("paint done");
   }
 
   @override
