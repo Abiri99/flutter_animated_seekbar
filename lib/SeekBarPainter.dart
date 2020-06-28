@@ -33,16 +33,20 @@ class SeekBarPainter extends CustomPainter {
 
     final Path path1 = Path()
       ..moveTo(0, height / 2)
-      ..quadraticBezierTo(
-        progress / 8,
-        height / 2,
+      ..cubicTo(
+        (progress - 12) / 2,
+        height / 2 + verticalDragOffset / 4,
+        3 * (progress - 12) / 4,
+        height / 2 + verticalDragOffset,
         progress - 12,
         height / 2 + verticalDragOffset,
       );
     final Path path2 = Path()
       ..moveTo(progress + 12, height / 2 + verticalDragOffset)
-      ..quadraticBezierTo(
-        progress + (width - progress) / 4,
+      ..cubicTo(
+        progress + (width - progress) / 2,
+        height / 2 + verticalDragOffset,
+        progress + (width - progress) / 2,
         height / 2,
         width,
         height / 2,

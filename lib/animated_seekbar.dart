@@ -21,7 +21,7 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
 
   @override
   void initState() {
-    progress = 50;
+    progress = widget.size.width / 2;
 //    verticalDragOffset = Offset.zero;
     verticalDragOffset = 0;
     super.initState();
@@ -29,27 +29,57 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-        setState(() {
-          verticalDragOffset = dragUpdateDetails.primaryDelta;
-        });
-      },
-//      onVerticalDragDown: (DragDownDetails dragDownDetails) {
-//        dragD
+//    return GestureDetector(
+//      onHorizontalDragStart: (DragStartDetails dragStartDetails) {
+//        if (dragStartDetails.localPosition.dx > 0 && dragStartDetails.localPosition.dx < widget.size.width)
+//          setState(() {
+//            progress = dragStartDetails.localPosition.dx;
+//            verticalDragOffset = dragStartDetails.localPosition.dy;
+//          });
 //      },
-      child: Container(
+//      onVerticalDragStart: (DragStartDetails dragStartDetails) {
+//        if (dragStartDetails.localPosition.dy < widget.size.height && dragStartDetails.localPosition.dy > 0)
+//          setState(() {
+//            progress = dragStartDetails.localPosition.dx;
+//            verticalDragOffset = dragStartDetails.localPosition.dy;
+//            verticalDragOffset = dragStartDetails.localPosition.dx;
+//          });
+//      },
+//      onVerticalDragDown: (DragDownDetails dragDownDetails) {
+//        setState(() {
+//          verticalDragOffset = dragDownDetails.localPosition;
+//        });
+//      },
+      return Container(
         color: Colors.blue,
-        child: CustomPaint(
-          size: widget.size,
-          painter: SeekBarPainter(
-            verticalDragOffset: verticalDragOffset ?? 0,
-            progress: progress,
-            width: widget.size.width,
-            height: widget.size.height,
+        child: GestureDetector(
+          onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
+            print("dx: ${dragUpdateDetails.localPosition.dx}");
+            if (dragUpdateDetails.localPosition.dx > 0 && dragUpdateDetails.localPosition.dx < widget.size.width)
+              setState(() {
+                progress = dragUpdateDetails.localPosition.dx;
+                verticalDragOffset = dragUpdateDetails.localPosition.dy;
+              });
+          },
+          onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
+            print("dy: ${dragUpdateDetails.localPosition.dy}");
+            if (dragUpdateDetails.localPosition.dy < widget.size.height && dragUpdateDetails.localPosition.dy > 0)
+              setState(() {
+                verticalDragOffset = dragUpdateDetails.primaryDelta;
+                progress = dragUpdateDetails.localPosition.dx;
+              });
+          },
+          child: CustomPaint(
+            size: widget.size,
+            painter: SeekBarPainter(
+              verticalDragOffset: verticalDragOffset ?? 0,
+              progress: progress,
+              width: widget.size.width,
+              height: widget.size.height,
+            ),
           ),
         ),
-      ),
-    );
+      );
+//    );
   }
 }
