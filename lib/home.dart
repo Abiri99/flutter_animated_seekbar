@@ -19,7 +19,7 @@ class _HomeState extends State<Home> {
           child: AnimatedSeekbar(
             size: Size(
               300,
-              300,
+              100,
             ),
           ),
         ),

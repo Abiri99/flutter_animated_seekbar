@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'SeekBarPainter.dart';
 
-class AnimatedSeekbar extends StatelessWidget {
+class AnimatedSeekbar extends StatefulWidget {
   final Size size;
 
   AnimatedSeekbar({
@@ -10,12 +10,45 @@ class AnimatedSeekbar extends StatelessWidget {
   });
 
   @override
+  _AnimatedSeekbarState createState() => _AnimatedSeekbarState();
+}
+
+class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
+
+  double progress;
+
+  double verticalDragOffset;
+
+  @override
+  void initState() {
+    progress = 50;
+//    verticalDragOffset = Offset.zero;
+    verticalDragOffset = 0;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: size,
-      painter: SeekBarPainter(
-        width: size.width,
-        height: size.height,
+    return GestureDetector(
+      onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
+        setState(() {
+          verticalDragOffset = dragUpdateDetails.primaryDelta;
+        });
+      },
+//      onVerticalDragDown: (DragDownDetails dragDownDetails) {
+//        dragD
+//      },
+      child: Container(
+        color: Colors.blue,
+        child: CustomPaint(
+          size: widget.size,
+          painter: SeekBarPainter(
+            verticalDragOffset: verticalDragOffset ?? 0,
+            progress: progress,
+            width: widget.size.width,
+            height: widget.size.height,
+          ),
+        ),
       ),
     );
   }
