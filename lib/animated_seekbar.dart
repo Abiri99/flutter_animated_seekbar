@@ -55,29 +55,40 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar> {
         child: GestureDetector(
           onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
             print("dx: ${dragUpdateDetails.localPosition.dx}");
+            print("dy: ${dragUpdateDetails.localPosition.dy}");
             if (dragUpdateDetails.localPosition.dx > 0 && dragUpdateDetails.localPosition.dx < widget.size.width)
               setState(() {
                 progress = dragUpdateDetails.localPosition.dx;
                 verticalDragOffset = dragUpdateDetails.localPosition.dy;
               });
           },
-          onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-            print("dy: ${dragUpdateDetails.localPosition.dy}");
-            if (dragUpdateDetails.localPosition.dy < widget.size.height && dragUpdateDetails.localPosition.dy > 0)
+          onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
+//            while(verticalDragOffset != 0) {
               setState(() {
-                verticalDragOffset = dragUpdateDetails.primaryDelta;
-                progress = dragUpdateDetails.localPosition.dx;
+                verticalDragOffset = 0;
               });
+//            }
           },
-          child: CustomPaint(
-            size: widget.size,
-            painter: SeekBarPainter(
-              verticalDragOffset: verticalDragOffset ?? 0,
-              progress: progress,
-              width: widget.size.width,
-              height: widget.size.height,
+//          onVerticalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
+//            print("vertical update");
+//            if (dragUpdateDetails.localPosition.dy < widget.size.height && dragUpdateDetails.localPosition.dy > 0)
+//              setState(() {
+//                verticalDragOffset = dragUpdateDetails.primaryDelta;
+// //                progress = dragUpdateDetails.localPosition.dx;
+//              });
+//          },
+//          child: AnimatedBuilder(
+//            animation: ,
+            child: CustomPaint(
+              size: widget.size,
+              painter: SeekBarPainter(
+                verticalDragOffset: verticalDragOffset ?? 0,
+                progress: progress,
+                width: widget.size.width,
+                height: widget.size.height,
+              ),
             ),
-          ),
+//          ),
         ),
       );
 //    );

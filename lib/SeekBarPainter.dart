@@ -20,22 +20,22 @@ class SeekBarPainter extends CustomPainter {
       ..color = Colors.red
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4;
+      ..strokeWidth = 6;
     final Paint circlePainter = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
+      ..strokeWidth = 6;
     final Paint linePainter = Paint()
       ..color = Colors.grey
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4;
+      ..strokeWidth = 3;
 
     final Path path1 = Path()
       ..moveTo(0, height / 2)
       ..cubicTo(
         (progress - 12) / 2,
-        height / 2 + verticalDragOffset / 4,
+        height / 2,
         3 * (progress - 12) / 4,
         height / 2 + verticalDragOffset,
         progress - 12,
@@ -46,7 +46,7 @@ class SeekBarPainter extends CustomPainter {
       ..cubicTo(
         progress + (width - progress) / 2,
         height / 2 + verticalDragOffset,
-        progress + (width - progress) / 2,
+        progress + 3 * (width - progress) / 4,
         height / 2,
         width,
         height / 2,
