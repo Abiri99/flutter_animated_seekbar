@@ -6,12 +6,14 @@ class SeekBarPainter extends CustomPainter {
   final double width;
   final double height;
   final double progress;
+  final bool touched;
 
   SeekBarPainter({
     @required this.verticalDragOffset,
     @required this.width,
     @required this.height,
     @required this.progress,
+    @required this.touched = false,
   });
 
   @override
@@ -23,7 +25,7 @@ class SeekBarPainter extends CustomPainter {
       ..strokeWidth = 6;
     final Paint circlePainter = Paint()
       ..color = Colors.red
-      ..style = PaintingStyle.stroke
+      ..style =  touched ? PaintingStyle.fill : PaintingStyle.stroke
       ..strokeWidth = 6;
     final Paint linePainter = Paint()
       ..color = Colors.grey

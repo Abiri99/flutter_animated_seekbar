@@ -18,6 +18,7 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar>
   double progress;
 
   double verticalDragOffset;
+  double horizontalDragOffset;
 
   AnimationController _controller;
 
@@ -25,68 +26,118 @@ class _AnimatedSeekbarState extends State<AnimatedSeekbar>
 
   bool loading;
 
+  bool touched;
+
   @override
   void initState() {
+    touched = false;
     loading = false;
     _controller = AnimationController(
-      duration: Duration(milliseconds: 500),
+      duration: Duration.zero,
+      reverseDuration: Duration(milliseconds: 500),
       vsync: this,
+//      value: 1,
     );
     _seekbarAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.elasticInOut,
-    )..addListener(() {
-      setState(() {});
-    })..addStatusListener((status) {
-      if (status == AnimationStatus.dismissed) {
+    )
+      ..addListener(() {
+//        print("controller value: ${_controller.value}");
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed) {
 //        _controller.forward();
-      } else if (status == AnimationStatus.completed) {
-        setState(() {
-          loading = false;
-        });
+        } else if (status == AnimationStatus.completed) {
+          setState(() {
+            loading = false;
+          });
 //        _controller.reverse();
 //        setState(() {
 //          verticalDragOffset = 0;
 //        });
-      }
-    });
+        }
+      });
 //    _controller.forward();
     progress = widget.size.width / 2;
     verticalDragOffset = 0;
+    horizontalDragOffset = 0;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
+//      color: Colors.blue,
       child: GestureDetector(
+        onTapDown: (TapDownDetails tapDownDetails) {
+          setState(() {
+            touched = true;
+          });
+        },
+        onTapUp: (TapUpDetails tapUpDetails) {
+          setState(() {
+            touched = false;
+          });
+        },
         onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-          if (dragUpdateDetails.localPosition.dx > 0 &&
-              dragUpdateDetails.localPosition.dx < widget.size.width)
+          _controller.forward().then((value) {
             setState(() {
-//              updating = true;
-              loading = true;
               progress = dragUpdateDetails.localPosition.dx;
-              verticalDragOffset = dragUpdateDetails.localPosition.dy;
+              verticalDragOffset = dragUpdateDetails.localPosition.dy - widget.size.height / 2;
             });
+          });
+
+
+//          if (dragUpdateDetails.localPosition.dx > 9 &&
+//              dragUpdateDetails.localPosition.dx < widget.size.width - 9
+//          ) {
+//            _controller.forward().then((value) => {});
+//            setState(() {
+////              _controller.forward();
+////              loading = true;
+//              progress = dragUpdateDetails.localPosition.dx;
+//              horizontalDragOffset = dragUpdateDetails.localPosition.dx;
+//            });
+//          }
+//          if (dragUpdateDetails.localPosition.dy < widget.size.height / 2 &&
+//              dragUpdateDetails.localPosition.dy > -widget.size.height / 2) {
+//            setState(() {
+//              print("dy: ${dragUpdateDetails.localPosition.dy}");
+//              verticalDragOffset = dragUpdateDetails.localPosition.dy;
+//            });
+//          }
         },
         onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
-          _controller.forward().then((value) => _controller.reset());
-//          _controller.reset();
+//          loading = false;
+//          touched = false;
+          _controller.reverse().then((value) {
+//            print("controller value after revert: ${_controller.value}");
+//            loading = false;
+            touched = false;
+            verticalDragOffset = 0;
+            _controller.reset();
+//            print("controller value after reset: ${_controller.value}");
+          });
         },
         child: AnimatedBuilder(
           animation: _seekbarAnimation,
           builder: (context, child) {
-            print("value: ${(1 - _seekbarAnimation.value) * verticalDragOffset}");
+            print("value: ${_seekbarAnimation.value}");
+            print(
+                "offset: $verticalDragOffset");
             return CustomPaint(
               size: widget.size,
               painter: SeekBarPainter(
                 progress: progress,
-                width: widget.size.width,
-                height: widget.size.height,
-                verticalDragOffset: loading ? (1 - _seekbarAnimation.value) * verticalDragOffset : 0
-              ),
+//                  progress: progress + (horizontalDragOffset - progress) * _seekbarAnimation.value,
+                  width: widget.size.width,
+                  height: widget.size.height,
+                  touched: touched,
+//                verticalDragOffset: loading ? (1 - _seekbarAnimation.value) * verticalDragOffset : 0
+                  verticalDragOffset:
+                      _seekbarAnimation.value * verticalDragOffset),
             );
           },
         ),
