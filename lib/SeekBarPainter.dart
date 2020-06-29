@@ -19,14 +19,14 @@ class SeekBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint progressPainter = Paint()
-      ..color = Colors.red
+      ..color = Color(0xff1f3453)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 6;
+      ..strokeWidth = 4;
     final Paint circlePainter = Paint()
-      ..color = Colors.red
+      ..color = Color(0xff1f3453)
       ..style =  touched ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = 6;
+      ..strokeWidth = 4;
     final Paint linePainter = Paint()
       ..color = Colors.grey
       ..style = PaintingStyle.stroke
