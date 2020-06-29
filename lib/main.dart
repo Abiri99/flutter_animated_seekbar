@@ -1,4 +1,4 @@
-import 'package:animatedseekbar/home.dart';
+import 'package:bouncyseekbar/home.dart';
 import 'package:flutter/material.dart';
 
 void main() {

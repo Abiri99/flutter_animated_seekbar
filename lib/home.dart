@@ -1,4 +1,4 @@
-import 'package:animatedseekbar/animated_seekbar.dart';
+import 'package:bouncyseekbar/seekbar/bouncy_seekbar.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -7,6 +7,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  String _progress;
+
+  @override
+  void initState() {
+    _progress = "";
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,9 +25,15 @@ class _HomeState extends State<Home> {
       backgroundColor: Colors.white,
       body: Container(
         child: Center(
-          child: AnimatedSeekbar(
+          child: BouncySeekbar(
+            valueListener: (String value) {
+              setState(() {
+                print("setState called");
+                _progress = value;
+              });
+            },
             size: Size(
-              300,
+              200,
               100,
             ),
           ),

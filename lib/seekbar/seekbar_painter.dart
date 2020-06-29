@@ -2,19 +2,41 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SeekBarPainter extends CustomPainter {
-  final double verticalDragOffset;
-  final double width;
-  final double height;
-  final double progress;
-  final bool touched;
+  double verticalDragOffset;
+  double progress;
+  bool touched;
+
+  double width;
+  double height;
+//  SeekBarType seekBarType;
+
+//  double firstNodeProgress;
+//  double secondNodeProgress;
+//  double firstNodeVerticalDragOffset;
+//  double secondNodeVerticalDragOffset;
+//  bool firstNodeTouched;
+//  bool secondNodeTouched;
 
   SeekBarPainter({
     @required this.verticalDragOffset,
     @required this.width,
     @required this.height,
     @required this.progress,
-    @required this.touched = false,
+    this.touched = false,
+//    this.seekBarType = SeekBarType.Default,
   });
+
+//  SeekBarPainter.rangePicker({
+//    @required this.width,
+//    @required this.height,
+//    @required this.firstNodeProgress,
+//    @required this.secondNodeProgress,
+//    @required this.firstNodeVerticalDragOffset,
+//    @required this.secondNodeVerticalDragOffset,
+//    @required this.firstNodeTouched,
+//    @required this.secondNodeTouched,
+//    this.seekBarType = SeekBarType.RangePicker,
+//  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -25,7 +47,7 @@ class SeekBarPainter extends CustomPainter {
       ..strokeWidth = 4;
     final Paint circlePainter = Paint()
       ..color = Color(0xff1f3453)
-      ..style =  touched ? PaintingStyle.fill : PaintingStyle.stroke
+      ..style = touched ? PaintingStyle.fill : PaintingStyle.stroke
       ..strokeWidth = 4;
     final Paint linePainter = Paint()
       ..color = Colors.grey
@@ -59,7 +81,8 @@ class SeekBarPainter extends CustomPainter {
 //        Offset(0, height / 2), Offset(progress - 12, height / 2), progressPainter);
 //    canvas.drawLine(Offset(progress + 12, height / 2 + verticalDragOffset),
 //        Offset(width, height / 2), linePainter);
-    canvas.drawCircle(Offset(progress, height / 2 + verticalDragOffset), 12, circlePainter);
+    canvas.drawCircle(
+        Offset(progress, height / 2 + verticalDragOffset), 12, circlePainter);
 //    print("paint done");
   }
 
