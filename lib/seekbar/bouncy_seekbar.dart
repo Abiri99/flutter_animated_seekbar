@@ -5,12 +5,16 @@ import 'seekbar_painter.dart';
 class BouncySeekbar extends StatefulWidget {
   final Function(String value) valueListener;
   final Size size;
+  final double minValue;
+  final double maxValue;
 
 //  final SeekBarType seekBarType;
 
   BouncySeekbar({
     @required this.valueListener,
     @required this.size,
+    this.minValue = 1,
+    this.maxValue = 100,
 //    this.seekBarType = SeekBarType.Default,
   });
 
@@ -75,14 +79,10 @@ class _BouncySeekbarState extends State<BouncySeekbar>
         },
         onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
           _controller.forward().then((value) {
-            if (dragUpdateDetails.localPosition.dx >= 9 &&
-                dragUpdateDetails.localPosition.dx <= widget.size.width - 9) {
-//              setState(() {
+            if (dragUpdateDetails.localPosition.dx >= 0 &&
+                dragUpdateDetails.localPosition.dx <= widget.size.width) {
               progress = dragUpdateDetails.localPosition.dx;
-              widget.valueListener(progress.toString());
-//                verticalDragOffset =
-//                    dragUpdateDetails.localPosition.dy - widget.size.height / 2;
-//              });
+              widget.valueListener(((widget.maxValue - widget.minValue) * dragUpdateDetails.localPosition.dx / widget.size.width).toString());
             }
             if (dragUpdateDetails.localPosition.dy >= 0 &&
                 dragUpdateDetails.localPosition.dy <= widget.size.height) {
@@ -102,8 +102,6 @@ class _BouncySeekbarState extends State<BouncySeekbar>
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            print("value: ${_seekbarAnimation.value}");
-            print("offset: $verticalDragOffset");
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

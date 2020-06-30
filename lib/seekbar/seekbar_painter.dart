@@ -62,7 +62,7 @@ class SeekBarPainter extends CustomPainter {
         height / 2,
         2 * (progress - 12) / 3,
         height / 2 + verticalDragOffset,
-        progress - 12,
+        touched ? progress : progress - 12,
         height / 2 + verticalDragOffset,
       );
     final Path path2 = Path()
