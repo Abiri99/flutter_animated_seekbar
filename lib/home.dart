@@ -1,3 +1,4 @@
+import 'package:bouncyseekbar/range_picker/bouncy_range_picker.dart';
 import 'package:bouncyseekbar/seekbar/bouncy_seekbar.dart';
 import 'package:flutter/material.dart';
 
@@ -25,17 +26,30 @@ class _HomeState extends State<Home> {
       backgroundColor: Colors.white,
       body: Container(
         child: Center(
-          child: BouncySeekbar(
-            valueListener: (String value) {
-              setState(() {
-                print("setState called");
-                _progress = value;
-              });
-            },
-            size: Size(
-              200,
-              100,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              BouncySeekbar(
+                valueListener: (String value) {
+                  setState(() {
+                    print("setState called");
+                    _progress = value;
+                  });
+                },
+                size: Size(
+                  200,
+                  100,
+                ),
+              ),
+
+              BouncyRangePikcer(
+                rangeListener: (firstVal, secVal) {},
+                size: Size(
+                  200,
+                  100,
+                ),
+              ),
+            ],
           ),
         ),
       ),

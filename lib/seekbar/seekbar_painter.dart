@@ -58,9 +58,9 @@ class SeekBarPainter extends CustomPainter {
     final Path path1 = Path()
       ..moveTo(0, height / 2)
       ..cubicTo(
-        (progress - 12) / 2,
+        (progress - 12) / 3,
         height / 2,
-        3 * (progress - 12) / 4,
+        2 * (progress - 12) / 3,
         height / 2 + verticalDragOffset,
         progress - 12,
         height / 2 + verticalDragOffset,
@@ -68,9 +68,9 @@ class SeekBarPainter extends CustomPainter {
     final Path path2 = Path()
       ..moveTo(progress + 12, height / 2 + verticalDragOffset)
       ..cubicTo(
-        progress + (width - progress) / 2,
+        progress + (width - progress) / 3,
         height / 2 + verticalDragOffset,
-        progress + 3 * (width - progress) / 4,
+        progress + 2 * (width - progress) / 3,
         height / 2,
         width,
         height / 2,

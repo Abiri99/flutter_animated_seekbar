@@ -38,7 +38,9 @@ class _BouncyRangePikcerState extends State<BouncyRangePikcer>
     secNodeTouched = false;
     firstNodeProgress = widget.size.width / 4;
     secNodeProgress = 3 * widget.size.width / 4;
+//    firstNodeVerticalOffset = widget.size.height / 2;
     firstNodeVerticalOffset = 0;
+//    secNodeVerticalOffset = widget.size.height / 2;
     secNodeVerticalOffset = 0;
 
 //    firstNodeController = AnimationController(
@@ -78,16 +80,22 @@ class _BouncyRangePikcerState extends State<BouncyRangePikcer>
   }
 
   int detectNode(var gestureDetectorDetails) {
+    if (firstNodeTouched)
+      return 0;
+    if (secNodeTouched)
+      return 1;
+//    return 1;
     if (gestureDetectorDetails.localPosition.dy >=
-            firstNodeVerticalOffset - 12 &&
+            widget.size.height / 2 + firstNodeVerticalOffset - 12 &&
         gestureDetectorDetails.localPosition.dy <=
-            firstNodeVerticalOffset + 12 &&
+            widget.size.height / 2 + firstNodeVerticalOffset + 12 &&
         gestureDetectorDetails.localPosition.dx >= firstNodeProgress - 12 &&
         gestureDetectorDetails.localPosition.dx <= firstNodeProgress + 12) {
       return 0;
     } else if (gestureDetectorDetails.localPosition.dy >=
-            secNodeVerticalOffset - 12 &&
-        gestureDetectorDetails.localPosition.dy <= secNodeVerticalOffset + 12 &&
+            widget.size.height / 2 + secNodeVerticalOffset - 12 &&
+        gestureDetectorDetails.localPosition.dy <=
+            widget.size.height / 2 + secNodeVerticalOffset + 12 &&
         gestureDetectorDetails.localPosition.dx >= secNodeProgress - 12 &&
         gestureDetectorDetails.localPosition.dx <= secNodeProgress + 12) {
       return 1;
@@ -201,8 +209,10 @@ class _BouncyRangePikcerState extends State<BouncyRangePikcer>
                 secNodeTouched: secNodeTouched,
                 firstNodeProgress: firstNodeProgress,
                 secNodeProgress: secNodeProgress,
-                firstNodeVerticalOffset: firstNodeVerticalOffset,
-                secNodeVerticalOffset: secNodeVerticalOffset,
+                firstNodeVerticalOffset:
+                    firstNodeAnimation.value * firstNodeVerticalOffset,
+                secNodeVerticalOffset:
+                    secNodeAnimation.value * secNodeVerticalOffset,
               ),
             );
           },
