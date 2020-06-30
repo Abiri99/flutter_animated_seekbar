@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SeekBarPainter extends CustomPainter {
@@ -8,52 +7,41 @@ class SeekBarPainter extends CustomPainter {
 
   double width;
   double height;
-//  SeekBarType seekBarType;
 
-//  double firstNodeProgress;
-//  double secondNodeProgress;
-//  double firstNodeVerticalDragOffset;
-//  double secondNodeVerticalDragOffset;
-//  bool firstNodeTouched;
-//  bool secondNodeTouched;
+  double thickLineStrokeWidth;
+  double thinLineStrokeWidth;
+
+  Color thickLineColor;
+  Color thinLineColor;
 
   SeekBarPainter({
     @required this.verticalDragOffset,
     @required this.width,
     @required this.height,
     @required this.progress,
+    @required this.thickLineStrokeWidth,
+    @required this.thinLineStrokeWidth,
+    @required this.thickLineColor,
+    @required this.thinLineColor,
     this.touched = false,
-//    this.seekBarType = SeekBarType.Default,
   });
-
-//  SeekBarPainter.rangePicker({
-//    @required this.width,
-//    @required this.height,
-//    @required this.firstNodeProgress,
-//    @required this.secondNodeProgress,
-//    @required this.firstNodeVerticalDragOffset,
-//    @required this.secondNodeVerticalDragOffset,
-//    @required this.firstNodeTouched,
-//    @required this.secondNodeTouched,
-//    this.seekBarType = SeekBarType.RangePicker,
-//  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint progressPainter = Paint()
-      ..color = Color(0xff1f3453)
+      ..color = thickLineColor
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4;
+      ..strokeWidth = thickLineStrokeWidth;
     final Paint circlePainter = Paint()
-      ..color = Color(0xff1f3453)
+      ..color = thickLineColor
       ..style = touched ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = 4;
-    final Paint linePainter = Paint()
-      ..color = Colors.grey
+      ..strokeWidth = thickLineStrokeWidth;
+    final Paint defaultPainter = Paint()
+      ..color = thinLineColor
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 3;
+      ..strokeWidth = thinLineStrokeWidth;
 
     final Path path1 = Path()
       ..moveTo(0, height / 2)
@@ -76,14 +64,9 @@ class SeekBarPainter extends CustomPainter {
         height / 2,
       );
     canvas.drawPath(path1, progressPainter);
-    canvas.drawPath(path2, linePainter);
-//    canvas.drawLine(
-//        Offset(0, height / 2), Offset(progress - 12, height / 2), progressPainter);
-//    canvas.drawLine(Offset(progress + 12, height / 2 + verticalDragOffset),
-//        Offset(width, height / 2), linePainter);
+    canvas.drawPath(path2, defaultPainter);
     canvas.drawCircle(
         Offset(progress, height / 2 + verticalDragOffset), 12, circlePainter);
-//    print("paint done");
   }
 
   @override

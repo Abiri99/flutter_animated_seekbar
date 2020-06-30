@@ -8,15 +8,25 @@ class BouncySeekbar extends StatefulWidget {
   final double minValue;
   final double maxValue;
 
-//  final SeekBarType seekBarType;
+  double thickLineStrokeWidth;
+  double thinLineStrokeWidth;
+
+  Color thickLineColor;
+  Color thinLineColor;
 
   BouncySeekbar({
     @required this.valueListener,
     @required this.size,
     this.minValue = 1,
     this.maxValue = 100,
-//    this.seekBarType = SeekBarType.Default,
-  });
+    this.thickLineStrokeWidth = 4,
+    this.thinLineStrokeWidth = 3,
+    this.thickLineColor,
+    this.thinLineColor,
+  }) {
+    if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
+    if (thinLineColor == null) thinLineColor = Colors.blueGrey;
+  }
 
   @override
   _BouncySeekbarState createState() => _BouncySeekbarState();
@@ -65,7 +75,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
     return Container(
       height: widget.size.height,
       width: widget.size.width,
-      color: Colors.red,
+//      color: Colors.red,
       child: GestureDetector(
         onTapDown: (TapDownDetails tapDownDetails) {
           setState(() {
@@ -82,7 +92,10 @@ class _BouncySeekbarState extends State<BouncySeekbar>
             if (dragUpdateDetails.localPosition.dx >= 0 &&
                 dragUpdateDetails.localPosition.dx <= widget.size.width) {
               progress = dragUpdateDetails.localPosition.dx;
-              widget.valueListener(((widget.maxValue - widget.minValue) * dragUpdateDetails.localPosition.dx / widget.size.width).toString());
+              widget.valueListener(((widget.maxValue - widget.minValue) *
+                      dragUpdateDetails.localPosition.dx /
+                      widget.size.width)
+                  .toString());
             }
             if (dragUpdateDetails.localPosition.dy >= 0 &&
                 dragUpdateDetails.localPosition.dy <= widget.size.height) {
@@ -108,14 +121,18 @@ class _BouncySeekbarState extends State<BouncySeekbar>
 //                Container(color: Colors.green, child: Text(progress.toString(), style: TextStyle(fontSize: 20),)),
                 CustomPaint(
                   size: Size(widget.size.width, widget.size.height),
-//                  size: widget.size,
                   painter: SeekBarPainter(
-                      progress: progress,
-                      width: widget.size.width,
-                      height: widget.size.height,
-                      touched: touched,
-                      verticalDragOffset:
-                          _seekbarAnimation.value * verticalDragOffset),
+                    progress: progress,
+                    width: widget.size.width,
+                    height: widget.size.height,
+                    touched: touched,
+                    verticalDragOffset:
+                        _seekbarAnimation.value * verticalDragOffset,
+                    thickLineColor: widget.thickLineColor,
+                    thickLineStrokeWidth: widget.thickLineStrokeWidth,
+                    thinLineColor: widget.thinLineColor,
+                    thinLineStrokeWidth: widget.thinLineStrokeWidth,
+                  ),
                 ),
               ],
             );

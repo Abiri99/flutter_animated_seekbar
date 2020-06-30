@@ -30,8 +30,7 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               BouncySeekbar(
-//                tickStroke: 4,
-//                lightStroke: 2,
+                thickLineStrokeWidth: 7,
                 minValue: 1,
                 maxValue: 100,
                 valueListener: (String value) {
