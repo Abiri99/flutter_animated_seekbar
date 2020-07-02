@@ -14,6 +14,8 @@ class SeekBarPainter extends CustomPainter {
   Color thickLineColor;
   Color thinLineColor;
 
+  double circleRadius;
+
   SeekBarPainter({
     @required this.verticalDragOffset,
     @required this.width,
@@ -23,6 +25,7 @@ class SeekBarPainter extends CustomPainter {
     @required this.thinLineStrokeWidth,
     @required this.thickLineColor,
     @required this.thinLineColor,
+    @required this.circleRadius,
     this.touched = false,
   });
 
@@ -44,29 +47,36 @@ class SeekBarPainter extends CustomPainter {
       ..strokeWidth = thinLineStrokeWidth;
 
     final Path path1 = Path()
-      ..moveTo(0, height / 2)
+      ..moveTo(thickLineStrokeWidth / 2, height / 2)
       ..cubicTo(
         (progress - 12) / 3,
         height / 2,
         2 * (progress - 12) / 3,
         height / 2 + verticalDragOffset,
-        touched ? progress : progress - 12,
+        touched ? progress : progress - circleRadius - thickLineStrokeWidth / 2,
         height / 2 + verticalDragOffset,
       );
     final Path path2 = Path()
-      ..moveTo(progress + 12, height / 2 + verticalDragOffset)
+      ..moveTo(
+          touched
+              ? progress
+              : progress + circleRadius + thickLineStrokeWidth / 2,
+          height / 2 + verticalDragOffset)
       ..cubicTo(
         progress + (width - progress) / 3,
         height / 2 + verticalDragOffset,
         progress + 2 * (width - progress) / 3,
         height / 2,
-        width,
+        width - thinLineStrokeWidth / 2,
         height / 2,
       );
     canvas.drawPath(path1, progressPainter);
     canvas.drawPath(path2, defaultPainter);
     canvas.drawCircle(
-        Offset(progress, height / 2 + verticalDragOffset), 12, circlePainter);
+      Offset(progress, height / 2 + verticalDragOffset),
+      circleRadius,
+      circlePainter,
+    );
   }
 
   @override

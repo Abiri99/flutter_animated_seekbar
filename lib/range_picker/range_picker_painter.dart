@@ -20,7 +20,7 @@ class RangePickerPainter extends CustomPainter {
     this.firstNodeTouched,
     this.secNodeTouched,
   }) {
-    print("firstnodevertical: $firstNodeVerticalOffset");
+//    print("firstnodevertical: $firstNodeVerticalOffset");
   }
 
   @override

@@ -30,12 +30,13 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               BouncySeekbar(
-                thickLineStrokeWidth: 7,
+                thickLineStrokeWidth: 4,
+                thinLineStrokeWidth: 1,
                 minValue: 1,
                 maxValue: 100,
                 valueListener: (String value) {
                   setState(() {
-                    print("progress: $value");
+//                    print("progress: $value");
                     _progress = value;
                   });
                 },

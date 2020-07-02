@@ -11,6 +11,8 @@ class BouncySeekbar extends StatefulWidget {
   double thickLineStrokeWidth;
   double thinLineStrokeWidth;
 
+  double circleRadius;
+
   Color thickLineColor;
   Color thinLineColor;
 
@@ -19,6 +21,7 @@ class BouncySeekbar extends StatefulWidget {
     @required this.size,
     this.minValue = 1,
     this.maxValue = 100,
+    this.circleRadius = 12,
     this.thickLineStrokeWidth = 4,
     this.thinLineStrokeWidth = 3,
     this.thickLineColor,
@@ -34,6 +37,8 @@ class BouncySeekbar extends StatefulWidget {
 
 class _BouncySeekbarState extends State<BouncySeekbar>
     with SingleTickerProviderStateMixin {
+  GlobalKey _key = GlobalKey();
+
   double progress;
 
   double verticalDragOffset;
@@ -45,8 +50,17 @@ class _BouncySeekbarState extends State<BouncySeekbar>
 
   bool touched;
 
+  getSizeAndPosition() {
+    RenderBox renderBox = _key.currentContext.findRenderObject();
+    print("render size: ${renderBox.size}");
+    print("render position: ${renderBox.localToGlobal(Offset.zero)}");
+  }
+
   @override
   void initState() {
+//    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+//      getSizeAndPosition();
+//    });
     touched = false;
     _controller = AnimationController(
       duration: Duration.zero,
@@ -75,7 +89,8 @@ class _BouncySeekbarState extends State<BouncySeekbar>
     return Container(
       height: widget.size.height,
       width: widget.size.width,
-//      color: Colors.red,
+      color: Colors.grey,
+//      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: GestureDetector(
         onTapDown: (TapDownDetails tapDownDetails) {
           setState(() {
@@ -88,22 +103,43 @@ class _BouncySeekbarState extends State<BouncySeekbar>
           });
         },
         onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-          _controller.forward().then((value) {
-            if (dragUpdateDetails.localPosition.dx >= 0 &&
-                dragUpdateDetails.localPosition.dx <= widget.size.width) {
-              progress = dragUpdateDetails.localPosition.dx;
-              widget.valueListener(((widget.maxValue - widget.minValue) *
-                      dragUpdateDetails.localPosition.dx /
-                      widget.size.width)
-                  .toString());
-            }
-            if (dragUpdateDetails.localPosition.dy >= 0 &&
-                dragUpdateDetails.localPosition.dy <= widget.size.height) {
-              verticalDragOffset =
-                  dragUpdateDetails.localPosition.dy - widget.size.height / 2;
-            }
-            setState(() {});
-          });
+          RenderBox box = context.findRenderObject();
+          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
+
+          if (touchPoint.dx > widget.size.width || touchPoint.dx < 0)
+//            return;
+
+          print("touchpoint: ${touchPoint.dx}");
+//          return;
+
+          _controller.forward().then(
+            (value) {
+//            print("dx: ${dragUpdateDetails.localPosition.dx}");
+//              if (dragUpdateDetails.localPosition.dx > widget.size.width)
+//                return;
+//            if (dragUpdateDetails.localPosition.dy > widget.size.height)
+//              return;
+
+              if (touchPoint.dx >= widget.circleRadius + widget.thickLineStrokeWidth/2 && touchPoint.dx <= widget.size.width - widget.circleRadius - widget.thickLineStrokeWidth/2) {
+                progress = touchPoint.dx;
+                var value = (touchPoint.dx - widget.circleRadius - widget.thickLineStrokeWidth/2) / (widget.size.width - 2*(widget.circleRadius - widget.thickLineStrokeWidth/2)) * (widget.maxValue - widget.minValue);
+                widget.valueListener(value.toString());
+//                widget.valueListener(((widget.maxValue - widget.minValue) *
+//                        dragUpdateDetails.localPosition.dx /
+//                        (widget.size.width -
+//                            2 *
+//                                (widget.thickLineStrokeWidth +
+//                                    widget.circleRadius)))
+//                    .toString());
+              }
+              if (dragUpdateDetails.localPosition.dy >= 0 &&
+                  dragUpdateDetails.localPosition.dy <= widget.size.height) {
+                verticalDragOffset =
+                    dragUpdateDetails.localPosition.dy - widget.size.height / 2;
+              }
+              setState(() {});
+            },
+          );
         },
         onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
           _controller.reverse().then((value) {
@@ -120,6 +156,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
               children: <Widget>[
 //                Container(color: Colors.green, child: Text(progress.toString(), style: TextStyle(fontSize: 20),)),
                 CustomPaint(
+                  key: _key,
                   size: Size(widget.size.width, widget.size.height),
                   painter: SeekBarPainter(
                     progress: progress,
@@ -132,6 +169,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
                     thickLineStrokeWidth: widget.thickLineStrokeWidth,
                     thinLineColor: widget.thinLineColor,
                     thinLineStrokeWidth: widget.thinLineStrokeWidth,
+                    circleRadius: widget.circleRadius,
                   ),
                 ),
               ],
