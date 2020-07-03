@@ -2,26 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:bouncyseekbar/utils.dart';
 import 'seekbar_painter.dart';
 
+// ignore: must_be_immutable
 class BouncySeekbar extends StatefulWidget {
+  // Notifies parent of the current value
   final Function(String value) valueListener;
+  // Size of seek bar
   final Size size;
+  // Minimum value of seek bar
   final double minValue;
+  // Maximum value of seek bar
   final double maxValue;
-
+  // How much seek bar stretches in vertical axis
   final double stretchRange;
-
-  double thickLineStrokeWidth;
-  double thinLineStrokeWidth;
-
-  double circleRadius;
-
+  // Thickness of progress line and thumb
+  final double thickLineStrokeWidth;
+  // Thickness of default line
+  final double thinLineStrokeWidth;
+  // Radius of thumb
+  final double circleRadius;
+  // Color of progress line and thumb
   Color thickLineColor;
+  // Color of default line
   Color thinLineColor;
+  // Speed of bouncing animation
+  final Duration duration;
 
   BouncySeekbar({
     @required this.valueListener,
     @required this.size,
-    this.stretchRange = 100,
+    this.stretchRange = 40,
     this.minValue = 1,
     this.maxValue = 100,
     this.circleRadius = 12,
@@ -29,6 +38,7 @@ class BouncySeekbar extends StatefulWidget {
     this.thinLineStrokeWidth = 3,
     this.thickLineColor,
     this.thinLineColor,
+    this.duration,
   }) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
     if (thinLineColor == null) thinLineColor = Colors.blueGrey;
@@ -49,6 +59,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
 
   double trackStartX;
   double trackEndX;
+  double trackY;
 
   AnimationController _controller;
 
@@ -64,7 +75,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
     touched = false;
     _controller = AnimationController(
       duration: Duration.zero,
-      reverseDuration: Duration(milliseconds: 1000),
+      reverseDuration: widget.duration ?? Duration(milliseconds: 800),
       vsync: this,
 //      value: 1,
     );
@@ -73,16 +84,17 @@ class _BouncySeekbarState extends State<BouncySeekbar>
       curve: Curves.elasticIn,
     )
       ..addListener(() {
-//        print("anim val: ${_seekbarAnimation.value}");
-        setState(() {});
+        print("anim val: ${_seekbarAnimation.value}");
+//        setState(() {});
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
         } else if (status == AnimationStatus.completed) {}
       });
     value = (widget.maxValue - widget.minValue) / 2;
-    thumbY = 0;
+    thumbY = widget.size.height / 2;
     thumbX = 0;
+    trackY = widget.size.height / 2;
     trackEndX = widget.size.width -
         widget.circleRadius -
         widget.thickLineStrokeWidth / 2;
@@ -100,6 +112,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
 
   @override
   Widget build(BuildContext context) {
+    print("anim value: ${_seekbarAnimation.value}");
     return Container(
       height: widget.size.height,
       width: widget.size.width,
@@ -131,10 +144,13 @@ class _BouncySeekbarState extends State<BouncySeekbar>
 
           _controller.forward().then(
             (value) {
+//              print("x: ${touchPoint.dx}");
+              print("y: ${touchPoint.dy}");
+//              print("track y: $trackY");
               thumbX = (dragUpdateDetails.localPosition.dx as double)
                   .coerceHorizontal(trackStartX, trackEndX);
-              thumbY = (touchPoint.dy as double)
-                  .coerceVertical(widget.size.height / 2, widget.stretchRange)
+              thumbY = (touchPoint.dy - widget.size.height / 2 as double)
+                  .coerceVertical(0, 20.0)
                   .coerceToStretchRange(
                       thumbX,
                       widget.size.height,
@@ -197,7 +213,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
                   size: Size(widget.size.width, widget.size.height),
                   painter: SeekBarPainter(
                     thumbX: thumbX,
-                    thumbY: _seekbarAnimation.value * thumbY,
+                    thumbY: widget.size.height/2 + _seekbarAnimation.value * thumbY,
                     width: widget.size.width,
                     height: widget.size.height,
                     touched: touched,

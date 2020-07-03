@@ -22,7 +22,6 @@ extension DoubleExtention on double {
     if (this == 0)
       return this;
     if (this < 0) {
-      print("dragged up: $this");
       return this.coerceAtLeast(
 //        x <= width/2 ? -40 : -80
         x <= width/2 ?
@@ -30,7 +29,7 @@ extension DoubleExtention on double {
         -(((2 * stretchRange) * (x - trackEndX)) / (width - (2 * trackEndX))) + (0)
       );
     } else {
-      print("dragged down: $this");
+//      return 40;
       return this.coerceAtMost(x < width / 2
           ? (((2 * (stretchRange + height / 2) - height) * (x - trackStartX)) /
                   (width - (2 * trackStartX))) +

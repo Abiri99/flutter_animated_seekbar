@@ -82,17 +82,17 @@ class SeekBarPainter extends CustomPainter {
     x1 = (thumbX + trackStartX) / 2;
     y1 = height / 2;
     x2 = x1;
-    y2 = height / 2 + thumbY;
+    y2 = thumbY;
 
     path.moveTo(trackStartX, height/2);
-    path.cubicTo(x1, y1, x2, y2, thumbX, height / 2 + thumbY);
+    path.cubicTo(x1, y1, x2, y2, thumbX, thumbY);
     canvas.drawPath(path, progressPainter);
 
     path.reset();
-    path.moveTo(thumbX, height / 2 + thumbY);
+    path.moveTo(thumbX, thumbY);
     
     x1 = (thumbX + trackEndX) / 2;
-    y1 = height / 2 + thumbY;
+    y1 = thumbY;
     x2 = x1;
     y2 = height/2;
     
@@ -100,7 +100,7 @@ class SeekBarPainter extends CustomPainter {
 
     canvas.drawPath(path, defaultPainter);
 
-    canvas.drawCircle(Offset(thumbX, height / 2 + thumbY), circleRadius, circleBorderPainter);
+    canvas.drawCircle(Offset(thumbX, thumbY), circleRadius, circleBorderPainter);
     
 //    final Path path1 = Path()
 //      ..moveTo(thickLineStrokeWidth + circleRadius, height / 2)
