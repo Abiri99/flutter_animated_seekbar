@@ -23,13 +23,11 @@ extension DoubleExtention on double {
       return this;
     if (this < 0) {
       return this.coerceAtLeast(
-//        x <= width/2 ? -40 : -80
         x <= width/2 ?
         -(((2 * stretchRange) * (x - trackStartX)) / (width - (2 * trackStartX))) + (0) :
         -(((2 * stretchRange) * (x - trackEndX)) / (width - (2 * trackEndX))) + (0)
       );
     } else {
-//      return 40;
       return this.coerceAtMost(x < width / 2
           ? (((2 * (stretchRange + height / 2) - height) * (x - trackStartX)) /
                   (width - (2 * trackStartX))) +

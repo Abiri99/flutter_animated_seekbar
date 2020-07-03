@@ -30,7 +30,7 @@ class BouncySeekbar extends StatefulWidget {
   BouncySeekbar({
     @required this.valueListener,
     @required this.size,
-    this.stretchRange = 40,
+    this.stretchRange = 100,
     this.minValue = 0,
     this.maxValue = 100,
     this.circleRadius = 12,
@@ -102,8 +102,6 @@ class _BouncySeekbarState extends State<BouncySeekbar>
   }
 
   String getCurrentValue() {
-//    print("thumbx: $thumbX");
-//    print("trackStartX: $trackStartX");
     if (thumbX <= trackStartX) return widget.minValue.toString();
     if (thumbX >= trackEndX) return widget.maxValue.toString();
     return (((thumbX - trackStartX) / (trackEndX - trackStartX)) *
@@ -138,7 +136,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
               thumbX = (dragUpdateDetails.localPosition.dx as double)
                   .coerceHorizontal(trackStartX, trackEndX);
               thumbY = (touchPoint.dy - widget.size.height / 2 as double)
-                  .coerceVertical(0, 20.0)
+                  .coerceVertical(0, widget.stretchRange)
                   .coerceToStretchRange(
                       thumbX,
                       widget.size.height,
