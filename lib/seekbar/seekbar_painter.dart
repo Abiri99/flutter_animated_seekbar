@@ -85,11 +85,12 @@ class SeekBarPainter extends CustomPainter {
     y2 = thumbY;
 
     path.moveTo(trackStartX, height/2);
-    path.cubicTo(x1, y1, x2, y2, thumbX, thumbY);
-    canvas.drawPath(path, progressPainter);
+    path.cubicTo(x1, y1, x2, y2, thumbX - circleRadius, thumbY);
+    if (thumbX - circleRadius >= trackStartX)
+      canvas.drawPath(path, progressPainter);
 
     path.reset();
-    path.moveTo(thumbX, thumbY);
+    path.moveTo(thumbX + circleRadius, thumbY);
     
     x1 = (thumbX + trackEndX) / 2;
     y1 = thumbY;
@@ -98,44 +99,11 @@ class SeekBarPainter extends CustomPainter {
     
     path.cubicTo(x1, y1, x2, y2, trackEndX, trackY);
 
-    canvas.drawPath(path, defaultPainter);
+    if (thumbX + circleRadius <= trackEndX)
+      canvas.drawPath(path, defaultPainter);
 
+    canvas.drawCircle(Offset(thumbX, thumbY), circleRadius - 2, circleInsidePainter);
     canvas.drawCircle(Offset(thumbX, thumbY), circleRadius, circleBorderPainter);
-    
-//    final Path path1 = Path()
-//      ..moveTo(thickLineStrokeWidth + circleRadius, height / 2)
-//      ..cubicTo(
-//        (progress - 12) / 3,
-//        height / 2,
-//        2 * (progress - 12) / 3,
-//        height / 2 + thumbY,
-//        progress - circleRadius - thickLineStrokeWidth / 2,
-//        height / 2 + thumbY,
-//      );
-//    final Path path2 = Path()
-//      ..moveTo(
-//          progress + circleRadius + thickLineStrokeWidth / 2,
-//          height / 2 + thumbY)
-//      ..cubicTo(
-//        progress + (width - progress) / 3,
-//        height / 2 + thumbY,
-//        progress + 2 * (width - progress) / 3,
-//        height / 2,
-//        width - thinLineStrokeWidth - circleRadius,
-//        height / 2,
-//      );
-//    canvas.drawPath(path1, progressPainter);
-//    canvas.drawPath(path2, defaultPainter);
-//    canvas.drawCircle(
-//      Offset(progress, height / 2 + thumbY),
-//      circleRadius,
-//      circleInsidePainter,
-//    );
-//    canvas.drawCircle(
-//      Offset(progress, height / 2 + thumbY),
-//      circleRadius + 2,
-//      circleBorderPainter,
-//    );
   }
 
   @override

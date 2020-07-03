@@ -32,11 +32,11 @@ class _HomeState extends State<Home> {
               BouncySeekbar(
                 thickLineStrokeWidth: 4,
                 thinLineStrokeWidth: 1,
-                minValue: 1,
+                minValue: 0,
                 maxValue: 100,
                 valueListener: (String value) {
+                  print("val: $value");
                   setState(() {
-//                    print("progress: $value");
                     _progress = value;
                   });
                 },
