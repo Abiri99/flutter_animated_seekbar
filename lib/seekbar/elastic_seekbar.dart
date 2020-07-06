@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:bouncyseekbar/utils.dart';
 import 'seekbar_painter.dart';
+import '../utils.dart';
 
 // ignore: must_be_immutable
-class BouncySeekbar extends StatefulWidget {
+class ElasticSeekBar extends StatefulWidget {
   // Notifies parent of the current value
   final Function(String value) valueListener;
   // Size of seek bar
@@ -25,9 +25,9 @@ class BouncySeekbar extends StatefulWidget {
   // Color of default line
   Color thinLineColor;
   // Speed of bouncing animation
-  final Duration duration;
+  final Duration bounceDuration;
 
-  BouncySeekbar({
+  ElasticSeekBar({
     @required this.valueListener,
     @required this.size,
     this.stretchRange = 100,
@@ -38,17 +38,17 @@ class BouncySeekbar extends StatefulWidget {
     this.thinLineStrokeWidth = 3,
     this.thickLineColor,
     this.thinLineColor,
-    this.duration,
+    this.bounceDuration,
   }) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
     if (thinLineColor == null) thinLineColor = Colors.blueGrey;
   }
 
   @override
-  _BouncySeekbarState createState() => _BouncySeekbarState();
+  _ElasticSeekBarState createState() => _ElasticSeekBarState();
 }
 
-class _BouncySeekbarState extends State<BouncySeekbar>
+class _ElasticSeekBarState extends State<ElasticSeekBar>
     with SingleTickerProviderStateMixin {
   GlobalKey _key = GlobalKey();
 
@@ -75,7 +75,7 @@ class _BouncySeekbarState extends State<BouncySeekbar>
     touched = false;
     _controller = AnimationController(
       duration: Duration.zero,
-      reverseDuration: widget.duration ?? Duration(milliseconds: 800),
+      reverseDuration: widget.bounceDuration ?? Duration(milliseconds: 800),
       vsync: this,
 //      value: 1,
     );

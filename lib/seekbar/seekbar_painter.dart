@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class SeekBarPainter extends CustomPainter {
 
   double x1;
-  double x2;
   double y1;
+  double x2;
   double y2;
 
   double thumbX;
@@ -58,7 +58,7 @@ class SeekBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-//    path.reset();
+    path.reset();
     
     final Paint progressPainter = Paint()
       ..color = thickLineColor
@@ -67,7 +67,7 @@ class SeekBarPainter extends CustomPainter {
       ..strokeWidth = thickLineStrokeWidth;
 
     final Paint circleInsidePainter = Paint()
-      ..color = thickLineColor.withOpacity(0.6)
+      ..color = thickLineColor.withOpacity(touched ? 0.9 : 0.4)
       ..style = PaintingStyle.fill;
     final Paint circleBorderPainter = Paint()
       ..color = thickLineColor

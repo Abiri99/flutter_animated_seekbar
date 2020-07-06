@@ -1,5 +1,5 @@
-import 'package:bouncyseekbar/range_picker/bouncy_range_picker.dart';
-import 'package:bouncyseekbar/seekbar/bouncy_seekbar.dart';
+import 'package:bouncyseekbar/range_picker/elastic_range_picker.dart';
+import 'package:bouncyseekbar/seekbar/elastic_seekbar.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -29,14 +29,14 @@ class _HomeState extends State<Home> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              BouncySeekbar(
+              ElasticSeekBar(
                 thickLineStrokeWidth: 4,
                 thinLineStrokeWidth: 1,
                 minValue: 0,
                 stretchRange: 60,
+                bounceDuration: Duration(seconds: 1),
                 maxValue: 100,
                 valueListener: (String value) {
-                  print("val: $value");
                   setState(() {
                     _progress = value;
                   });
@@ -47,8 +47,8 @@ class _HomeState extends State<Home> {
                 ),
               ),
 
-              BouncyRangePikcer(
-                rangeListener: (firstVal, secVal) {},
+              ElasticRangePicker(
+                valueListener: (firstVal, secVal) {},
                 size: Size(
                   200,
                   100,
