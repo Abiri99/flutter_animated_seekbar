@@ -18,7 +18,7 @@ class ElasticSeekBar extends StatefulWidget {
   final double maxValue;
 
   // How much seek bar stretches in vertical axis
-  final double stretchRange;
+  double stretchRange;
 
   // Thickness of progress line and thumb
   final double thickLineStrokeWidth;
@@ -45,7 +45,7 @@ class ElasticSeekBar extends StatefulWidget {
   ElasticSeekBar({
     @required this.valueListener,
     @required this.size,
-    this.stretchRange = 100,
+    this.stretchRange,
     this.minValue = 0,
     this.maxValue = 100,
     this.circleRadius = 12,
@@ -59,6 +59,7 @@ class ElasticSeekBar extends StatefulWidget {
   }) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
     if (thinLineColor == null) thinLineColor = Colors.blueGrey;
+    if (stretchRange == null) stretchRange = size.height/2 - circleRadius - thickLineStrokeWidth/2;
   }
 
   @override
@@ -67,8 +68,6 @@ class ElasticSeekBar extends StatefulWidget {
 
 class _ElasticSeekBarState extends State<ElasticSeekBar>
     with SingleTickerProviderStateMixin {
-  GlobalKey _key = GlobalKey();
-
   double value;
 
   double thumbY;
@@ -80,37 +79,16 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
 
   AnimationController _controller;
 
-  Animation _seekbarAnimation;
-
   Animation<double> _animation;
 
   bool touched;
 
   @override
   void initState() {
-//    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-//      getSizeAndPosition();
-//    });
-
     _controller =
         AnimationController(vsync: this, upperBound: 500);
 
-    _controller.addListener(() {
-//      print("val: ${_animation.value}");
-//      var value = 10 * (1 - _animation.value) * thumbY;
-
-//      const spring = SpringDescription(
-//        mass: 1.0,
-//        stiffness: 300.0,
-//        damping: 0.5,
-//      );
-//      final simulation = SpringSimulation(spring, 0, 100, -4000.0);
-      setState(() {
-        print("anim val: ${_animation.value}");
-        thumbY = _animation.value;
-//        thumbY = 2 * (1 - _animation.value) * thumbY;
-      });
-    });
+    _controller.addListener(controllerListener);
 
     touched = false;
     value = (widget.maxValue - widget.minValue) / 2;
@@ -124,6 +102,12 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
     super.initState();
   }
 
+  controllerListener() {
+    setState(() {
+      thumbY = _animation.value;
+    });
+  }
+
   String getCurrentValue() {
     if (thumbX <= trackStartX) return widget.minValue.toString();
     if (thumbX >= trackEndX) return widget.maxValue.toString();
@@ -133,15 +117,6 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
   }
 
   runAnimation(Offset pixelsPerSecond, Size size) {
-//    _animation = CurvedAnimation(
-//      parent: _controller,
-//      curve: Curves.elasticOut,
-//    );
-
-//    _controller.forward().then((value) {
-//      _controller.reset();
-//    });
-
     _animation = _controller.drive(Tween<double>(
       begin: thumbY,
       end: 0.0,
@@ -176,15 +151,11 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
         onPanUpdate: (DragUpdateDetails dragUpdateDetails) {
           RenderBox box = context.findRenderObject();
           var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
-
-//          _controller.forward().then(
-//            (value) {
-
           setState(() {
-            thumbX = (dragUpdateDetails.localPosition.dx as double)
+            thumbX = (touchPoint.dx as double)
                 .coerceHorizontal(trackStartX, trackEndX);
             thumbY = (touchPoint.dy - widget.size.height / 2)
-                .coerceVertical(0, widget.stretchRange)
+                .coerceVertical(0, widget.size.height/2 - widget.circleRadius - widget.thickLineStrokeWidth/2)
                 .coerceToStretchRange(
                     thumbX,
                     widget.size.height,
@@ -194,14 +165,9 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
                     trackEndX);
           });
           widget.valueListener(getCurrentValue());
-//            },
-//          );
         },
         onPanEnd: (DragEndDetails dragEndDetails) {
           runAnimation(dragEndDetails.velocity.pixelsPerSecond, size);
-//          print("end");
-//          _controller.animateBack(0.0).then((value) {
-//          });
         },
         child: CustomPaint(
           size: Size(widget.size.width, widget.size.height),
@@ -224,6 +190,7 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
 
   @override
   void dispose() {
+    _controller.removeListener(controllerListener);
     _controller.dispose();
     super.dispose();
   }
