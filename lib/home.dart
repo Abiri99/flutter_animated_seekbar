@@ -29,24 +29,24 @@ class _HomeState extends State<Home> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              ElasticSeekBar(
-                thickLineStrokeWidth: 4,
-                thinLineStrokeWidth: 1,
-                minValue: 0,
-                stretchRange: 60,
-                bounceDuration: Duration(seconds: 1),
-                maxValue: 100,
-                valueListener: (String value) {
-                  print("val: $value");
-                  setState(() {
-                    _progress = value;
-                  });
-                },
-                size: Size(
-                  300,
-                  100,
-                ),
-              ),
+//              ElasticSeekBar(
+//                thickLineStrokeWidth: 4,
+//                thinLineStrokeWidth: 1,
+//                minValue: 0,
+//                stretchRange: 60,
+//                bounceDuration: Duration(seconds: 1),
+//                maxValue: 100,
+//                valueListener: (String value) {
+//                  print("val: $value");
+////                  setState(() {
+////                    _progress = value;
+////                  });
+//                },
+//                size: Size(
+//                  300,
+//                  100,
+//                ),
+//              ),
 
               ElasticRangePicker(
                 valueListener: (firstVal, secVal) {},

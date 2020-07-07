@@ -1,5 +1,6 @@
 import 'package:bouncyseekbar/range_picker/range_picker_painter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import '../utils.dart';
 
 class ElasticRangePicker extends StatefulWidget {
@@ -9,7 +10,7 @@ class ElasticRangePicker extends StatefulWidget {
   final double maxValue;
 
   // How much seek bar stretches in vertical axis
-  final double stretchRange;
+  double stretchRange;
 
   // Thickness of progress line and thumb
   final double thickLineStrokeWidth;
@@ -29,10 +30,14 @@ class ElasticRangePicker extends StatefulWidget {
   // Speed of bouncing animation
   final Duration bounceDuration;
 
+  final double stiffness;
+
+  final double dampingRatio;
+
   ElasticRangePicker({
     this.size,
     this.valueListener,
-    this.stretchRange = 100,
+    this.stretchRange,
     this.minValue = 0,
     this.maxValue = 100,
     this.circleRadius = 12,
@@ -41,9 +46,13 @@ class ElasticRangePicker extends StatefulWidget {
     this.thickLineColor,
     this.thinLineColor,
     this.bounceDuration,
+    this.stiffness = 300,
+    this.dampingRatio = 8,
   }) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
     if (thinLineColor == null) thinLineColor = Colors.blueGrey;
+    if (stretchRange == null)
+      stretchRange = size.height / 2 - circleRadius - thickLineStrokeWidth / 2;
   }
 
   @override
@@ -61,131 +70,119 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
   double trackEndX;
   double trackY;
 
-  double firstVal;
-  double secVal;
+  double firstValue;
+  double secondValue;
 
-  // Old
   bool firstNodeTouched;
   bool secNodeTouched;
 
-//  double firstNodeProgress;
-//  double secNodeProgress;
-//
-//  double firstNodeVerticalOffset;
-//  double secNodeVerticalOffset;
+  AnimationController _firstController;
+  AnimationController _secondController;
 
-  AnimationController firstController;
-  AnimationController secController;
-
-//  AnimationController secondNodeController;
-
-  Animation firstNodeAnimation;
-  Animation secNodeAnimation;
-
-  String getFirstValue() {
-    if (firstThumbX <= trackStartX) return widget.minValue.toString();
-    if (firstThumbX >= trackEndX) return widget.maxValue.toString();
-    return (((firstThumbX - trackStartX) / (trackEndX - trackStartX)) *
-            (widget.maxValue - widget.minValue))
-        .toString();
-  }
-
-  String getSecValue() {
-    if (secThumbX <= trackStartX) return widget.minValue.toString();
-    if (secThumbX >= trackEndX) return widget.maxValue.toString();
-    return (((secThumbX - trackStartX) / (trackEndX - trackStartX)) *
-            (widget.maxValue - widget.minValue))
-        .toString();
-  }
+  Animation<double> _firstAnimation;
+  Animation<double> _secondAnimation;
 
   @override
   void initState() {
-    firstThumbY = widget.size.height / 2;
-    secThumbY = widget.size.height / 2;
+    _firstController = AnimationController(vsync: this, upperBound: 500);
+    _secondController = AnimationController(vsync: this, upperBound: 500);
 
-    trackY = widget.size.height / 2;
+    _firstController.addListener(firstControllerListener);
+    _secondController.addListener(secondControllerListener);
+
+    firstNodeTouched = false;
+    secNodeTouched = false;
+    firstValue = (widget.maxValue - widget.minValue) / 3;
+    secondValue = 2 * (widget.maxValue - widget.minValue) / 3;
+    firstThumbY = 0;
+    secThumbY = 0;
+    firstThumbX = widget.size.width / 3;
+    secThumbX = 2 * widget.size.width / 3;
     trackEndX = widget.size.width -
         widget.circleRadius -
         widget.thickLineStrokeWidth / 2;
     trackStartX = widget.circleRadius + widget.thickLineStrokeWidth / 2;
-    firstThumbX = (trackEndX - trackStartX) / 3;
-    secThumbX = 2 * (trackEndX - trackStartX) / 3;
+  }
 
-    firstVal = double.parse(getFirstValue());
-    secVal = double.parse(getSecValue());
+  firstControllerListener() {
+    setState(() {
+      firstThumbY = _firstAnimation.value;
+    });
+  }
 
-    // Old
-    firstNodeTouched = false;
-    secNodeTouched = false;
-//    firstNodeProgress = widget.size.width / 4;
-//    secNodeProgress = 3 * widget.size.width / 4;
-//    firstNodeVerticalOffset = widget.size.height / 2;
-//    firstNodeVerticalOffset = 0;
-//    secNodeVerticalOffset = widget.size.height / 2;
-//    secNodeVerticalOffset = 0;
+  secondControllerListener() {
+    setState(() {
+      secThumbY = _secondAnimation.value;
+    });
+  }
 
-//    firstNodeController = AnimationController(
-//      duration: Duration.zero,
-//      reverseDuration: Duration(milliseconds: 1000),
-//      vsync: this,
-//    );
-    firstController = AnimationController(
-      duration: Duration.zero,
-      reverseDuration: Duration(milliseconds: 1000),
-      vsync: this,
+  double getFirstValue() {
+    if (firstThumbX <= trackStartX) return widget.minValue;
+    if (firstThumbX >= trackEndX) return widget.maxValue;
+    return (((firstThumbX - trackStartX) / (trackEndX - trackStartX)) *
+        (widget.maxValue - widget.minValue));
+  }
+
+  double getSecValue() {
+    if (secThumbX <= trackStartX) return widget.minValue;
+    if (secThumbX >= trackEndX) return widget.maxValue;
+    return (((secThumbX - trackStartX) / (trackEndX - trackStartX)) *
+        (widget.maxValue - widget.minValue));
+  }
+
+  runFirstThumbAnimation(Offset pixelsPerSecond, Size size) {
+    _firstAnimation = _firstController.drive(Tween<double>(
+      begin: firstThumbY,
+      end: 0.0,
+    ));
+    var spring = SpringDescription(
+      mass: 1.0,
+      stiffness: widget.stiffness,
+      damping: widget.dampingRatio,
     );
-    secController = AnimationController(
-      duration: Duration.zero,
-      reverseDuration: Duration(milliseconds: 1000),
-      vsync: this,
+
+    final unitsPerSecondX = pixelsPerSecond.dx / size.width;
+    final unitsPerSecondY = pixelsPerSecond.dy / size.height;
+    final unitsPerSecond = Offset(unitsPerSecondX, unitsPerSecondY);
+    final unitVelocity = unitsPerSecond.distance;
+
+    final simulation = SpringSimulation(spring, 0, 1, -unitVelocity);
+
+    _firstController.animateWith(simulation);
+  }
+
+  runSecondThumbAnimation(Offset pixelsPerSecond, Size size) {
+    _secondAnimation = _secondController.drive(Tween<double>(
+      begin: secThumbY,
+      end: 0.0,
+    ));
+    var spring = SpringDescription(
+      mass: 1.0,
+      stiffness: widget.stiffness,
+      damping: widget.dampingRatio,
     );
 
-    firstNodeAnimation = CurvedAnimation(
-      parent: firstController,
-      curve: Curves.elasticIn,
-    )
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-        } else if (status == AnimationStatus.completed) {}
-      });
-    secNodeAnimation = CurvedAnimation(
-      parent: secController,
-      curve: Curves.elasticIn,
-    )
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-        } else if (status == AnimationStatus.completed) {}
-      });
-    super.initState();
+    final unitsPerSecondX = pixelsPerSecond.dx / size.width;
+    final unitsPerSecondY = pixelsPerSecond.dy / size.height;
+    final unitsPerSecond = Offset(unitsPerSecondX, unitsPerSecondY);
+    final unitVelocity = unitsPerSecond.distance;
+
+    final simulation = SpringSimulation(spring, 0, 1, -unitVelocity);
+
+    _secondController.animateWith(simulation);
   }
 
   int detectNode(var gestureDetectorDetails) {
     if (firstNodeTouched) return 0;
     if (secNodeTouched) return 1;
-//    return 1;
-//    print("dy: ${gestureDetectorDetails.localPosition.dy}");
-//    print("dx: ${gestureDetectorDetails.localPosition.dx}");
-//    print("trackY: $trackY");
-//    print("trackStartX: $trackStartX");
-//    print("trackEndX: $trackEndX");
-//    print("firstThumbY: $firstThumbY");
-//    print("firstThumbX: $firstThumbX");
-//    print("secThumbY: $secThumbY");
-//    print("secThumbX: $secThumbX");
     if (gestureDetectorDetails.localPosition.dy >=
 //            trackY -
-            firstThumbY -
+            widget.size.height / 2 -
                 widget.circleRadius -
                 widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dy <=
 //            trackY -
-            firstThumbY +
+            widget.size.height / 2 +
                 widget.circleRadius +
                 widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dx >=
@@ -196,184 +193,168 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
             firstThumbX +
                 widget.circleRadius +
                 widget.thickLineStrokeWidth / 2) {
+      print("touched first node");
       return 0;
     } else if (gestureDetectorDetails.localPosition.dy >=
 //            trackY -
-            secThumbY - widget.circleRadius - widget.thickLineStrokeWidth / 2 &&
+            widget.size.height / 2 -
+                widget.circleRadius -
+                widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dy <=
 //            trackY -
-            secThumbY + widget.circleRadius + widget.thickLineStrokeWidth / 2 &&
+            widget.size.height / 2 +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dx >=
             secThumbX - widget.circleRadius - widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dx <=
             secThumbX + widget.circleRadius + widget.thickLineStrokeWidth / 2) {
+      print("touched sec node");
       return 1;
     }
     return -1;
   }
 
-  bool isInVerticalConstraint(var gestureDetectorDetails) {
-    if (gestureDetectorDetails.localPosition.dy >= 0 &&
-        gestureDetectorDetails.localPosition.dy <= widget.size.height) {
-      return true;
-    }
-    return false;
-  }
-
-  bool isInHorizontalConstraint(var gestureDetectorDetails) {
-    if (gestureDetectorDetails.localPosition.dx >= 0 &&
-        gestureDetectorDetails.localPosition.dx <= widget.size.width) {
-      return true;
-    }
-    return false;
-  }
+//  bool isInVerticalConstraint(var gestureDetectorDetails) {
+//    if (gestureDetectorDetails.localPosition.dy >= 0 &&
+//        gestureDetectorDetails.localPosition.dy <= widget.size.height) {
+//      return true;
+//    }
+//    return false;
+//  }
+//
+//  bool isInHorizontalConstraint(var gestureDetectorDetails) {
+//    if (gestureDetectorDetails.localPosition.dx >= 0 &&
+//        gestureDetectorDetails.localPosition.dx <= widget.size.width) {
+//      return true;
+//    }
+//    return false;
+//  }
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Container(
       height: widget.size.height,
       width: widget.size.width,
       color: Colors.green,
       child: GestureDetector(
-        onTapDown: (TapDownDetails tapDownDetails) {
-          var node = detectNode(tapDownDetails);
-          print("node; $node");
+        onPanDown: (details) {
+          var node = detectNode(details);
+          if (node == 0) _firstController.stop();
+          if (node == 1) _secondController.stop();
+        },
+        onPanUpdate: (DragUpdateDetails dragUpdateDetails) {
+//          RenderBox box = context.findRenderObject();
+//          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
+          var node = detectNode(dragUpdateDetails);
           if (node == 0) {
-            // THIS MEANS FIRST NODE IS TAPPED
+            firstNodeTouched = true;
             setState(() {
-              firstNodeTouched = true;
-              secNodeTouched = false;
+              firstThumbX = dragUpdateDetails.localPosition.dx.coerceHorizontal(
+                  trackStartX,
+                  trackEndX -
+                      2 *
+                          (widget.circleRadius +
+                              widget.thickLineStrokeWidth / 2));
+              if (dragUpdateDetails.localPosition.dx >=
+                  secThumbX -
+                      widget.circleRadius -
+                      widget.thickLineStrokeWidth / 2) {
+                secThumbX = (dragUpdateDetails.localPosition.dx +
+                        widget.circleRadius +
+                        widget.thickLineStrokeWidth / 2)
+                    .coerceHorizontal(
+                        trackStartX +
+                            2 *
+                                (widget.circleRadius +
+                                    widget.thickLineStrokeWidth / 2),
+                        trackEndX);
+              }
+              firstThumbY =
+                  (dragUpdateDetails.localPosition.dy - widget.size.height / 2)
+                      .coerceVertical(
+                          0,
+                          widget.size.height / 2 -
+                              widget.circleRadius -
+                              widget.thickLineStrokeWidth / 2)
+                      .coerceToStretchRange(
+                          firstThumbX,
+                          widget.size.height,
+                          widget.size.width,
+                          widget.stretchRange,
+                          trackStartX,
+                          trackEndX);
             });
+            widget.valueListener(getFirstValue(), getSecValue());
           } else if (node == 1) {
-            // THIS MEANS SECOND NODE IS TOUCHED
+            secNodeTouched = true;
             setState(() {
-              firstNodeTouched = false;
-              secNodeTouched = true;
+              secThumbX = dragUpdateDetails.localPosition.dx.coerceHorizontal(
+                  trackStartX +
+                      2 *
+                          (widget.circleRadius +
+                              widget.thickLineStrokeWidth / 2),
+                  trackEndX);
+              if (dragUpdateDetails.localPosition.dx <=
+                  firstThumbX +
+                      widget.circleRadius +
+                      widget.thickLineStrokeWidth / 2) {
+                firstThumbX = (dragUpdateDetails.localPosition.dx -
+                        widget.circleRadius -
+                        widget.thickLineStrokeWidth / 2)
+                    .coerceHorizontal(
+                        trackStartX,
+                        trackEndX -
+                            2 *
+                                (widget.circleRadius +
+                                    widget.thickLineStrokeWidth / 2));
+              }
+              secThumbY =
+                  (dragUpdateDetails.localPosition.dy - widget.size.height / 2)
+                      .coerceVertical(
+                          0,
+                          widget.size.height / 2 -
+                              widget.circleRadius -
+                              widget.thickLineStrokeWidth / 2)
+                      .coerceToStretchRange(
+                          secThumbX,
+                          widget.size.height,
+                          widget.size.width,
+                          widget.stretchRange,
+                          trackStartX,
+                          trackEndX);
             });
+            widget.valueListener(getFirstValue(), getSecValue());
           }
         },
-        onTapUp: (TapUpDetails tapUpDetails) {
+        onPanEnd: (DragEndDetails dragEndDetails) {
+          runFirstThumbAnimation(dragEndDetails.velocity.pixelsPerSecond, size);
+          runSecondThumbAnimation(
+              dragEndDetails.velocity.pixelsPerSecond, size);
           setState(() {
             firstNodeTouched = false;
             secNodeTouched = false;
           });
         },
-        onHorizontalDragUpdate: (DragUpdateDetails dragUpdateDetails) {
-          var node = detectNode(dragUpdateDetails);
-          RenderBox box = context.findRenderObject();
-          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
-          if (node == 0) {
-            firstController.forward().then((value) {
-              firstThumbX = touchPoint.dx.coerceHorizontal(
-                  trackStartX,
-                  trackEndX -
-                      2 * widget.circleRadius -
-                      widget.thickLineStrokeWidth -
-                      widget.circleRadius -
-                      widget.thickLineStrokeWidth / 2);
-              if (touchPoint.dx >=
-                  secThumbX -
-                      widget.circleRadius -
-                      widget.thickLineStrokeWidth / 2)
-                secThumbX = touchPoint.dx.coerceHorizontal(
-                    secThumbX,
-                    trackEndX -
-                        widget.circleRadius -
-                        widget.thickLineStrokeWidth / 2);
-              firstThumbY = (touchPoint.dy - widget.size.height / 2)
-                  .coerceVertical(0, widget.stretchRange)
-                  .coerceToStretchRange(
-                      firstThumbX,
-                      widget.size.height,
-                      widget.size.width,
-                      widget.stretchRange,
-                      trackStartX,
-                      trackEndX);
-
-//              if (isInHorizontalConstraint(dragUpdateDetails)) {
-//                firstNodeProgress = dragUpdateDetails.localPosition.dx;
-//                if (firstNodeProgress > secNodeProgress)
-//                  secNodeProgress = firstNodeProgress;
-//              }
-//              if (isInVerticalConstraint(dragUpdateDetails)) {
-//                firstNodeVerticalOffset =
-//                    dragUpdateDetails.localPosition.dy - widget.size.height / 2;
-//              }
-              setState(() {});
-            });
-          } else if (node == 1) {
-            secController.forward().then((value) {
-              secThumbX =
-                  touchPoint.dx.coerceHorizontal(trackStartX, trackEndX);
-              secThumbY = (touchPoint.dy - widget.size.height / 2)
-                  .coerceVertical(0, widget.stretchRange)
-                  .coerceToStretchRange(
-                      secThumbX,
-                      widget.size.height,
-                      widget.size.width,
-                      widget.stretchRange,
-                      trackStartX,
-                      trackEndX);
-//              if (isInHorizontalConstraint(dragUpdateDetails)) {
-//                secNodeProgress = dragUpdateDetails.localPosition.dx;
-//                if (secNodeProgress < firstNodeProgress)
-//                  firstNodeProgress = secNodeProgress;
-//              }
-//              if (isInVerticalConstraint(dragUpdateDetails)) {
-//                secNodeVerticalOffset =
-//                    dragUpdateDetails.localPosition.dy - widget.size.height / 2;
-//              }
-              setState(() {});
-            });
-          }
-        },
-        onHorizontalDragEnd: (DragEndDetails dragEndDetails) {
-          firstController.reverse().then((value) {
-            firstThumbY = 0;
-            secThumbY = 0;
-//            firstNodeVerticalOffset = 0;
-//            secNodeVerticalOffset = 0;
-            firstController.reset();
-          });
-          secController.reverse().then((value) {
-            firstThumbY = 0;
-            secThumbY = 0;
-//            firstNodeVerticalOffset = 0;
-//            secNodeVerticalOffset = 0;
-            secController.reset();
-          });
-          firstNodeTouched = false;
-          secNodeTouched = false;
-        },
-        child: AnimatedBuilder(
-          animation: firstNodeAnimation,
-          builder: (context, child) {
-            return AnimatedBuilder(
-                animation: secNodeAnimation,
-                builder: (context, child) {
-                  return CustomPaint(
-                    size: Size(
-                      widget.size.width,
-                      widget.size.height,
-                    ),
-                    painter: RangePickerPainter(
-                      firstThumbX: firstThumbX,
-                      firstThumbY: widget.size.height / 2 +
-                          firstNodeAnimation.value * firstThumbY,
-                      secThumbX: secThumbX,
-                      secThumbY: widget.size.height / 2 +
-                          secNodeAnimation.value * secThumbY,
-                      circleRadius: 12,
-                      thickLineStrokeWidth: 4,
-                      thinLineStrokeWidth: 2,
-                      width: widget.size.width,
-                      height: widget.size.height,
-                      firstNodeTouched: firstNodeTouched,
-                      secNodeTouched: secNodeTouched,
-                    ),
-                  );
-                },);
-          },
+        child: CustomPaint(
+          size: Size(
+            widget.size.width,
+            widget.size.height,
+          ),
+          painter: RangePickerPainter(
+            firstThumbX: firstThumbX,
+            firstThumbY: firstThumbY,
+            secThumbX: secThumbX,
+            secThumbY: secThumbY,
+            circleRadius: 12,
+            thickLineStrokeWidth: 4,
+            thinLineStrokeWidth: 2,
+            width: widget.size.width,
+            height: widget.size.height,
+            firstNodeTouched: firstNodeTouched,
+            secNodeTouched: secNodeTouched,
+          ),
         ),
       ),
     );

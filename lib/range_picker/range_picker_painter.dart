@@ -66,6 +66,9 @@ class RangePickerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
+    firstThumbY = firstThumbY + height/2;
+    secThumbY = secThumbY + height/2;
+
     path.reset();
 
     final Paint progressLinePainter = Paint()
