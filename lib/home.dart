@@ -37,9 +37,9 @@ class _HomeState extends State<Home> {
                 bounceDuration: Duration(seconds: 1),
                 maxValue: 100,
                 valueListener: (String value) {
-                  setState(() {
-                    _progress = value;
-                  });
+//                  setState(() {
+//                    _progress = value;
+//                  });
                 },
                 size: Size(
                   300,

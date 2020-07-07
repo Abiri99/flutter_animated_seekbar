@@ -58,6 +58,8 @@ class SeekBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
+    thumbY = thumbY + height/2;
+
     path.reset();
     
     final Paint progressPainter = Paint()
