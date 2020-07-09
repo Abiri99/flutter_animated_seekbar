@@ -11,9 +11,14 @@ class _HomeState extends State<Home> {
 
   String _progress;
 
+  double val;
+  double val2;
+
   @override
   void initState() {
     _progress = "";
+    val = 0;
+    val2 = 0.5;
     super.initState();
   }
 
@@ -29,6 +34,34 @@ class _HomeState extends State<Home> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
+              ElasticSeekBar(
+                thickLineStrokeWidth: 4,
+                thinLineStrokeWidth: 1,
+                minValue: 0,
+                stretchRange: 60,
+                bounceDuration: Duration(seconds: 1),
+                maxValue: 100,
+                valueListener: (String value) {
+//                  setState(() {
+//                    _progress = value;
+//                  });
+                },
+                size: Size(
+                  300,
+                  100,
+                ),
+              ),
+//              Slider(
+//                value: val,
+//                onChanged: (value) {
+//                  setState(() {
+//                    val = value;
+//                  });
+//                },
+//              ),
+              SizedBox(
+                height: 100,
+              ),
 //              ElasticSeekBar(
 //                thickLineStrokeWidth: 4,
 //                thinLineStrokeWidth: 1,
@@ -37,7 +70,6 @@ class _HomeState extends State<Home> {
 //                bounceDuration: Duration(seconds: 1),
 //                maxValue: 100,
 //                valueListener: (String value) {
-//                  print("val: $value");
 ////                  setState(() {
 ////                    _progress = value;
 ////                  });
@@ -51,7 +83,7 @@ class _HomeState extends State<Home> {
               ElasticRangePicker(
                 valueListener: (firstVal, secVal) {},
                 size: Size(
-                  200,
+                  300,
                   100,
                 ),
               ),

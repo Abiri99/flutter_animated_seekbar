@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'seekbar_painter.dart';
@@ -43,6 +44,7 @@ class ElasticSeekBar extends StatefulWidget {
   final double dampingRatio;
 
   ElasticSeekBar({
+    Key key,
     @required this.valueListener,
     @required this.size,
     this.stretchRange,
@@ -56,10 +58,11 @@ class ElasticSeekBar extends StatefulWidget {
     this.bounceDuration,
     this.stiffness = 300,
     this.dampingRatio = 8,
-  }) {
+  }) : super(key: key) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
     if (thinLineColor == null) thinLineColor = Colors.blueGrey;
-    if (stretchRange == null) stretchRange = size.height/2 - circleRadius - thickLineStrokeWidth/2;
+    if (stretchRange == null)
+      stretchRange = size.height / 2 - circleRadius - thickLineStrokeWidth / 2;
   }
 
   @override
@@ -85,8 +88,7 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
 
   @override
   void initState() {
-    _controller =
-        AnimationController(vsync: this, upperBound: 500);
+    _controller = AnimationController(vsync: this, upperBound: 500);
 
     _controller.addListener(controllerListener);
 
@@ -139,11 +141,11 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    print("seekbar build called");
+//    Size size = MediaQuery.of(context).size;
     return Container(
       height: widget.size.height,
       width: widget.size.width,
-      color: Colors.grey,
       child: GestureDetector(
         onPanDown: (details) {
           _controller.stop();
@@ -151,11 +153,28 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
         onPanUpdate: (DragUpdateDetails dragUpdateDetails) {
           RenderBox box = context.findRenderObject();
           var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
+          print("dx: ${touchPoint.dx}");
+          print("dy: ${touchPoint.dy}");
+          if (dragUpdateDetails.localPosition.dx <= 0) {
+            touchPoint = new Offset(0, 0.0);
+          }
+          if (touchPoint.dx >= context.size.width) {
+            touchPoint = new Offset(context.size.width, 0);
+          }
+          if (touchPoint.dy <= 0) {
+            touchPoint = new Offset(touchPoint.dx, 0.0);
+          }
+          if (touchPoint.dy >= context.size.height) {
+            touchPoint = new Offset(touchPoint.dx, context.size.height);
+          }
           setState(() {
-            thumbX = (touchPoint.dx as double)
-                .coerceHorizontal(trackStartX, trackEndX);
+            thumbX = touchPoint.dx.coerceHorizontal(trackStartX, trackEndX);
             thumbY = (touchPoint.dy - widget.size.height / 2)
-                .coerceVertical(0, widget.size.height/2 - widget.circleRadius - widget.thickLineStrokeWidth/2)
+                .coerceVertical(
+                    0,
+                    widget.size.height / 2 -
+                        widget.circleRadius -
+                        widget.thickLineStrokeWidth / 2)
                 .coerceToStretchRange(
                     thumbX,
                     widget.size.height,
@@ -167,21 +186,26 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
           widget.valueListener(getCurrentValue());
         },
         onPanEnd: (DragEndDetails dragEndDetails) {
-          runAnimation(dragEndDetails.velocity.pixelsPerSecond, size);
+          runAnimation(dragEndDetails.velocity.pixelsPerSecond, widget.size);
         },
-        child: CustomPaint(
-          size: Size(widget.size.width, widget.size.height),
-          painter: SeekBarPainter(
-            thumbX: thumbX,
-            thumbY: thumbY,
-            width: widget.size.width,
-            height: widget.size.height,
-            touched: touched,
-            thickLineColor: widget.thickLineColor,
-            thickLineStrokeWidth: widget.thickLineStrokeWidth,
-            thinLineColor: widget.thinLineColor,
-            thinLineStrokeWidth: widget.thinLineStrokeWidth,
-            circleRadius: widget.circleRadius,
+        child: Container(
+          height: widget.size.height,
+          width: widget.size.width,
+          color: Colors.grey,
+          child: CustomPaint(
+            size: Size(widget.size.width, widget.size.height),
+            painter: SeekBarPainter(
+              thumbX: thumbX,
+              thumbY: thumbY,
+              width: widget.size.width,
+              height: widget.size.height,
+              touched: touched,
+              thickLineColor: widget.thickLineColor,
+              thickLineStrokeWidth: widget.thickLineStrokeWidth,
+              thinLineColor: widget.thinLineColor,
+              thinLineStrokeWidth: widget.thinLineStrokeWidth,
+              circleRadius: widget.circleRadius,
+            ),
           ),
         ),
       ),

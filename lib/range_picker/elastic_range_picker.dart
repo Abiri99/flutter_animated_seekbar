@@ -172,6 +172,47 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
     _secondController.animateWith(simulation);
   }
 
+  int detectNodeByTouchpoint(var touchpoint) {
+    if (firstNodeTouched) return 0;
+    if (secNodeTouched) return 1;
+    if (touchpoint.dy >=
+//            trackY -
+        widget.size.height / 2 -
+            widget.circleRadius -
+            widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dy <=
+//            trackY -
+            widget.size.height / 2 +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dx >=
+            firstThumbX -
+                widget.circleRadius -
+                widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dx <=
+            firstThumbX +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2) {
+      return 0;
+    } else if (touchpoint.dy >=
+//            trackY -
+        widget.size.height / 2 -
+            widget.circleRadius -
+            widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dy <=
+//            trackY -
+            widget.size.height / 2 +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dx >=
+            secThumbX - widget.circleRadius - widget.thickLineStrokeWidth / 2 &&
+        touchpoint.dx <=
+            secThumbX + widget.circleRadius + widget.thickLineStrokeWidth / 2) {
+      return 1;
+    }
+    return -1;
+  }
+
   int detectNode(var gestureDetectorDetails) {
     if (firstNodeTouched) return 0;
     if (secNodeTouched) return 1;
@@ -193,7 +234,6 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
             firstThumbX +
                 widget.circleRadius +
                 widget.thickLineStrokeWidth / 2) {
-      print("touched first node");
       return 0;
     } else if (gestureDetectorDetails.localPosition.dy >=
 //            trackY -
@@ -209,7 +249,6 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
             secThumbX - widget.circleRadius - widget.thickLineStrokeWidth / 2 &&
         gestureDetectorDetails.localPosition.dx <=
             secThumbX + widget.circleRadius + widget.thickLineStrokeWidth / 2) {
-      print("touched sec node");
       return 1;
     }
     return -1;
@@ -245,23 +284,35 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
           if (node == 1) _secondController.stop();
         },
         onPanUpdate: (DragUpdateDetails dragUpdateDetails) {
-//          RenderBox box = context.findRenderObject();
-//          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
-          var node = detectNode(dragUpdateDetails);
+          RenderBox box = context.findRenderObject();
+          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
+          if (touchPoint.dx <= 0) {
+            touchPoint = new Offset(0, 0.0);
+          }
+          if (touchPoint.dx >= context.size.width) {
+            touchPoint = new Offset(context.size.width, 0);
+          }
+          if (touchPoint.dy <= 0) {
+            touchPoint = new Offset(touchPoint.dx, 0.0);
+          }
+          if (touchPoint.dy >= context.size.height) {
+            touchPoint = new Offset(touchPoint.dx, context.size.height);
+          }
+          var node = detectNodeByTouchpoint(touchPoint);
           if (node == 0) {
             firstNodeTouched = true;
             setState(() {
-              firstThumbX = dragUpdateDetails.localPosition.dx.coerceHorizontal(
+              firstThumbX = touchPoint.dx.coerceHorizontal(
                   trackStartX,
                   trackEndX -
                       2 *
                           (widget.circleRadius +
                               widget.thickLineStrokeWidth / 2));
-              if (dragUpdateDetails.localPosition.dx >=
+              if (touchPoint.dx >=
                   secThumbX -
                       widget.circleRadius -
                       widget.thickLineStrokeWidth / 2) {
-                secThumbX = (dragUpdateDetails.localPosition.dx +
+                secThumbX = (touchPoint.dx +
                         widget.circleRadius +
                         widget.thickLineStrokeWidth / 2)
                     .coerceHorizontal(
@@ -272,7 +323,7 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                         trackEndX);
               }
               firstThumbY =
-                  (dragUpdateDetails.localPosition.dy - widget.size.height / 2)
+                  (touchPoint.dy - widget.size.height / 2)
                       .coerceVertical(
                           0,
                           widget.size.height / 2 -
@@ -281,26 +332,26 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                       .coerceToStretchRange(
                           firstThumbX,
                           widget.size.height,
-                          widget.size.width,
+                          secThumbX,
                           widget.stretchRange,
                           trackStartX,
-                          trackEndX);
+                          secThumbX - widget.circleRadius - widget.thickLineStrokeWidth / 2);
             });
             widget.valueListener(getFirstValue(), getSecValue());
           } else if (node == 1) {
             secNodeTouched = true;
             setState(() {
-              secThumbX = dragUpdateDetails.localPosition.dx.coerceHorizontal(
+              secThumbX = touchPoint.dx.coerceHorizontal(
                   trackStartX +
                       2 *
                           (widget.circleRadius +
                               widget.thickLineStrokeWidth / 2),
                   trackEndX);
-              if (dragUpdateDetails.localPosition.dx <=
+              if (touchPoint.dx <=
                   firstThumbX +
                       widget.circleRadius +
                       widget.thickLineStrokeWidth / 2) {
-                firstThumbX = (dragUpdateDetails.localPosition.dx -
+                firstThumbX = (touchPoint.dx -
                         widget.circleRadius -
                         widget.thickLineStrokeWidth / 2)
                     .coerceHorizontal(
@@ -311,7 +362,7 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                                     widget.thickLineStrokeWidth / 2));
               }
               secThumbY =
-                  (dragUpdateDetails.localPosition.dy - widget.size.height / 2)
+                  (touchPoint.dy - widget.size.height / 2)
                       .coerceVertical(
                           0,
                           widget.size.height / 2 -
@@ -320,9 +371,9 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                       .coerceToStretchRange(
                           secThumbX,
                           widget.size.height,
-                          widget.size.width,
+                          trackEndX - firstThumbX,
                           widget.stretchRange,
-                          trackStartX,
+                          firstThumbX + widget.circleRadius + widget.thickLineStrokeWidth / 2,
                           trackEndX);
             });
             widget.valueListener(getFirstValue(), getSecValue());

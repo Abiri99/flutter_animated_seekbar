@@ -66,8 +66,8 @@ class RangePickerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    firstThumbY = firstThumbY + height/2;
-    secThumbY = secThumbY + height/2;
+    var mFirstThumbY = firstThumbY + height/2;
+    var mSecThumbY = secThumbY + height/2;
 
     path.reset();
 
@@ -96,37 +96,40 @@ class RangePickerPainter extends CustomPainter {
     x1 = (firstThumbX + trackStartX) / 2;
     y1 = height / 2;
     x2 = x1;
-    y2 = firstThumbY;
+    y2 = mFirstThumbY;
 
     path.moveTo(trackStartX, height/2);
-    path.cubicTo(x1, y1, x2, y2, firstThumbX - circleRadius, firstThumbY);
+    path.cubicTo(x1, y1, x2, y2, firstThumbX - circleRadius, mFirstThumbY);
     if (firstThumbX - circleRadius >= trackStartX)
       canvas.drawPath(path, defaultPainter);
 
     path.reset();
-    path.moveTo(firstThumbX + circleRadius, firstThumbY);
+    path.moveTo(firstThumbX + circleRadius, mFirstThumbY);
 
+//    x1 = firstThumbX + (secThumbX - firstThumbX) / 2;
     x1 = (firstThumbX + secThumbX) / 2;
-    y1 = secThumbY;
+    y1 = mFirstThumbY;
     x2 = x1;
-    y2 = secThumbY;
+    y2 = mSecThumbY;
 
-    path.cubicTo(x1, y1, x2, y2, secThumbX - circleRadius, secThumbY);
+    path.cubicTo(x1, y1, x2, y2, secThumbX - circleRadius, mSecThumbY);
     canvas.drawPath(path, progressLinePainter);
 
     path.reset();
-    path.moveTo(secThumbX + circleRadius, secThumbY);
+    path.moveTo(secThumbX + circleRadius, mSecThumbY);
 
     x1 = (secThumbX + trackEndX) / 2;
-    y1 = secThumbY;
+    y1 = mSecThumbY;
     x2 = x1;
     y2 = height/2;
 
     path.cubicTo(x1, y1, x2, y2, trackEndX, trackY);
     canvas.drawPath(path, defaultPainter);
 
-    canvas.drawCircle(Offset(firstThumbX, firstThumbY), circleRadius, firstCirclePainter);
-    canvas.drawCircle(Offset(secThumbX, secThumbY), circleRadius, secCirclePainter);
+    canvas.drawCircle(Offset(firstThumbX, mFirstThumbY), circleRadius, firstCirclePainter);
+    canvas.drawCircle(Offset(secThumbX, mSecThumbY), circleRadius, secCirclePainter);
+
+    path.reset();
   }
 
   @override

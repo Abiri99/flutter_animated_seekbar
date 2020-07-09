@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   dartx: ^0.4.2
+#  flutter_seekbar:
+#    git: https://github.com/LiuC520/flutter_seekbar.git
 
 
   # The following adds the Cupertino Icons font to your application.
