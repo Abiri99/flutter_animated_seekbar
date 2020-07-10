@@ -299,8 +299,8 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
           if (touchPoint.dx <= 0) {
             touchPoint = new Offset(0, 0.0);
           }
-          if (touchPoint.dx >= context.size.width) {
-            touchPoint = new Offset(context.size.width, 0);
+          if (touchPoint.dx >= trackEndX) {
+            touchPoint = new Offset(trackEndX, 0);
           }
           if (touchPoint.dy <= 0) {
             touchPoint = new Offset(touchPoint.dx, 0.0);
@@ -320,13 +320,15 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                           (widget.circleRadius +
                               widget.thickLineStrokeWidth / 2),
                 );
-                if (touchPoint.dx >=
+                if (firstThumbX >=
                     secThumbX -
-                        widget.circleRadius -
-                        widget.thickLineStrokeWidth / 2) {
-                  secThumbX = (touchPoint.dx +
-                          widget.circleRadius +
-                          widget.thickLineStrokeWidth / 2)
+                        2 *
+                            (widget.circleRadius -
+                                widget.thickLineStrokeWidth / 2)) {
+                  secThumbX = (firstThumbX +
+                          2 *
+                              (widget.circleRadius +
+                                  widget.thickLineStrokeWidth / 2))
                       .coerceHorizontal(
                     trackStartX +
                         2 *
@@ -369,13 +371,13 @@ class _ElasticRangePickerState extends State<ElasticRangePicker>
                               widget.thickLineStrokeWidth / 2),
                   trackEndX,
                 );
-                if (touchPoint.dx <=
+                if (secThumbX <=
                     firstThumbX +
-                        widget.circleRadius +
-                        widget.thickLineStrokeWidth / 2) {
-                  firstThumbX = (touchPoint.dx -
+                        2 * (widget.circleRadius +
+                            widget.thickLineStrokeWidth / 2)) {
+                  firstThumbX = (secThumbX -
                           2 *
-                              (widget.circleRadius -
+                              (widget.circleRadius +
                                   widget.thickLineStrokeWidth / 2))
                       .coerceHorizontal(
                     trackStartX,

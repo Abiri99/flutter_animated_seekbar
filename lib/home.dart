@@ -81,7 +81,8 @@ class _HomeState extends State<Home> {
 //              ),
 
               ElasticRangePicker(
-                valueListener: (firstVal, secVal) {},
+                valueListener: (firstVal, secVal) {
+                },
                 size: Size(
                   300,
                   100,
