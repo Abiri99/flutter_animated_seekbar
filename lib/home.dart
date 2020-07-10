@@ -38,7 +38,7 @@ class _HomeState extends State<Home> {
                 thickLineStrokeWidth: 4,
                 thinLineStrokeWidth: 1,
                 minValue: 0,
-                stretchRange: 60,
+                stretchRange: 100,
                 bounceDuration: Duration(seconds: 1),
                 maxValue: 100,
                 valueListener: (String value) {

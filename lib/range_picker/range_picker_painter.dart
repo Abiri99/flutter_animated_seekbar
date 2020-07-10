@@ -17,6 +17,9 @@ class RangePickerPainter extends CustomPainter {
   double thickLineStrokeWidth;
   double thinLineStrokeWidth;
 
+  Color thickLineColor;
+  Color thinLineColor;
+
   Path path;
 
   // Old
@@ -45,6 +48,8 @@ class RangePickerPainter extends CustomPainter {
     this.circleRadius,
     this.thickLineStrokeWidth,
     this.thinLineStrokeWidth,
+    this.thickLineColor,
+    this.thinLineColor,
   }) {
 //    print("firstnodevertical: $firstNodeVerticalOffset");
     path = Path();
@@ -72,26 +77,34 @@ class RangePickerPainter extends CustomPainter {
     path.reset();
 
     final Paint progressLinePainter = Paint()
-      ..color = Color(0xff1f3453)
+      ..color = thickLineColor
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4;
+      ..strokeWidth = thickLineStrokeWidth;
 
     final Paint defaultPainter = Paint()
-      ..color = Colors.blue
+      ..color = thinLineColor
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 3;
+      ..strokeWidth = thinLineStrokeWidth;
 
     final Paint firstCirclePainter = Paint()
-      ..color = Color(0xff1f3453)
-      ..style = firstNodeTouched ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = 4;
+      ..color = thickLineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = thickLineStrokeWidth;
+
+    final Paint firstCircleInsidePainter = Paint()
+      ..color = thickLineColor.withOpacity(firstNodeTouched ? 0.9 : 0.4)
+      ..style = PaintingStyle.fill;
 
     final Paint secCirclePainter = Paint()
-      ..color = Color(0xff1f3453)
-      ..style = secNodeTouched ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = 4;
+      ..color = thickLineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = thickLineStrokeWidth;
+
+    final Paint secCircleInsidePainter = Paint()
+      ..color = thickLineColor.withOpacity(secNodeTouched ? 0.9 : 0.4)
+      ..style = PaintingStyle.fill;
 
     x1 = (firstThumbX + trackStartX) / 2;
     y1 = height / 2;
@@ -124,10 +137,13 @@ class RangePickerPainter extends CustomPainter {
     y2 = height/2;
 
     path.cubicTo(x1, y1, x2, y2, trackEndX, trackY);
-    canvas.drawPath(path, defaultPainter);
+    if (secThumbX + circleRadius <= trackEndX)
+      canvas.drawPath(path, defaultPainter);
 
     canvas.drawCircle(Offset(firstThumbX, mFirstThumbY), circleRadius, firstCirclePainter);
+    canvas.drawCircle(Offset(firstThumbX, mFirstThumbY), circleRadius - thickLineStrokeWidth/2, firstCircleInsidePainter);
     canvas.drawCircle(Offset(secThumbX, mSecThumbY), circleRadius, secCirclePainter);
+    canvas.drawCircle(Offset(secThumbX, mSecThumbY), circleRadius - thickLineStrokeWidth/2, secCircleInsidePainter);
 
     path.reset();
   }

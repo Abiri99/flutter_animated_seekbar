@@ -60,7 +60,7 @@ class ElasticSeekBar extends StatefulWidget {
     this.dampingRatio = 8,
   }) : super(key: key) {
     if (thickLineColor == null) thickLineColor = Color(0xff1f3453);
-    if (thinLineColor == null) thinLineColor = Colors.blueGrey;
+    if (thinLineColor == null) thinLineColor = Color(0xff1f3453).withAlpha(80);
     if (stretchRange == null)
       stretchRange = size.height / 2 - circleRadius - thickLineStrokeWidth / 2;
   }
@@ -139,53 +139,85 @@ class _ElasticSeekBarState extends State<ElasticSeekBar>
     _controller.animateWith(simulation);
   }
 
+  int detectNode(var gestureDetectorDetails) {
+    if (touched) return 0;
+    if (gestureDetectorDetails.localPosition.dy >=
+//            trackY -
+        widget.size.height / 2 -
+            widget.circleRadius -
+            widget.thickLineStrokeWidth / 2 &&
+        gestureDetectorDetails.localPosition.dy <=
+//            trackY -
+            widget.size.height / 2 +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2 &&
+        gestureDetectorDetails.localPosition.dx >=
+            thumbX -
+                widget.circleRadius -
+                widget.thickLineStrokeWidth / 2 &&
+        gestureDetectorDetails.localPosition.dx <=
+            thumbX +
+                widget.circleRadius +
+                widget.thickLineStrokeWidth / 2) {
+      return 0;
+    }
+    return -1;
+  }
+
   @override
   Widget build(BuildContext context) {
-    print("seekbar build called");
-//    Size size = MediaQuery.of(context).size;
     return Container(
       height: widget.size.height,
       width: widget.size.width,
       child: GestureDetector(
         onPanDown: (details) {
-          _controller.stop();
+          var node = detectNode(details);
+          if (node == 0) {
+            setState(() {
+              touched = true;
+            });
+            _controller.stop();
+          }
         },
         onPanUpdate: (DragUpdateDetails dragUpdateDetails) {
-          RenderBox box = context.findRenderObject();
-          var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
-          print("dx: ${touchPoint.dx}");
-          print("dy: ${touchPoint.dy}");
-          if (dragUpdateDetails.localPosition.dx <= 0) {
-            touchPoint = new Offset(0, 0.0);
+          var node = detectNode(dragUpdateDetails);
+          if (node == 0 || touched) {
+            touched = true;
+            RenderBox box = context.findRenderObject();
+            var touchPoint = box.globalToLocal(dragUpdateDetails.globalPosition);
+            if (dragUpdateDetails.localPosition.dx <= 0) {
+              touchPoint = new Offset(0, 0.0);
+            }
+            if (touchPoint.dx >= context.size.width) {
+              touchPoint = new Offset(context.size.width, 0);
+            }
+            if (touchPoint.dy <= 0) {
+              touchPoint = new Offset(touchPoint.dx, 0.0);
+            }
+            if (touchPoint.dy >= context.size.height) {
+              touchPoint = new Offset(touchPoint.dx, context.size.height);
+            }
+            setState(() {
+              thumbX = touchPoint.dx.coerceHorizontal(trackStartX, trackEndX);
+              thumbY = (touchPoint.dy - widget.size.height / 2)
+                  .coerceVertical(
+                  0,
+                  widget.size.height / 2 -
+                      widget.circleRadius -
+                      widget.thickLineStrokeWidth / 2)
+                  .coerceToStretchRange(
+                  thumbX,
+                  widget.size.height,
+                  widget.size.width,
+                  widget.stretchRange,
+                  trackStartX,
+                  trackEndX);
+            });
+            widget.valueListener(getCurrentValue());
           }
-          if (touchPoint.dx >= context.size.width) {
-            touchPoint = new Offset(context.size.width, 0);
-          }
-          if (touchPoint.dy <= 0) {
-            touchPoint = new Offset(touchPoint.dx, 0.0);
-          }
-          if (touchPoint.dy >= context.size.height) {
-            touchPoint = new Offset(touchPoint.dx, context.size.height);
-          }
-          setState(() {
-            thumbX = touchPoint.dx.coerceHorizontal(trackStartX, trackEndX);
-            thumbY = (touchPoint.dy - widget.size.height / 2)
-                .coerceVertical(
-                    0,
-                    widget.size.height / 2 -
-                        widget.circleRadius -
-                        widget.thickLineStrokeWidth / 2)
-                .coerceToStretchRange(
-                    thumbX,
-                    widget.size.height,
-                    widget.size.width,
-                    widget.stretchRange,
-                    trackStartX,
-                    trackEndX);
-          });
-          widget.valueListener(getCurrentValue());
         },
         onPanEnd: (DragEndDetails dragEndDetails) {
+          touched = false;
           runAnimation(dragEndDetails.velocity.pixelsPerSecond, widget.size);
         },
         child: Container(

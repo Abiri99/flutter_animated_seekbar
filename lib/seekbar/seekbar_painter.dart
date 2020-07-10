@@ -12,7 +12,6 @@ class SeekBarPainter extends CustomPainter {
 
   Path path;
 
-//  double progress;
   bool touched;
 
   double width;
@@ -61,8 +60,6 @@ class SeekBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    print("paint called: $this");
-
     var mThumbY = thumbY + height / 2;
 
     // Progress line
@@ -109,7 +106,7 @@ class SeekBarPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     path.reset();
-    canvas.drawCircle(Offset(thumbX, mThumbY), circleRadius - 2, painter);
+    canvas.drawCircle(Offset(thumbX, mThumbY), circleRadius - thickLineStrokeWidth/2, painter);
 
     // Circle border
     painter = Paint()
